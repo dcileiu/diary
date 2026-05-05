@@ -1,15 +1,103 @@
 page {
-  background-color: #f4faf5;
-  color: #1a1a1a;
+  background:
+    radial-gradient(circle at top left, rgba(255, 224, 214, 0.9), transparent 36%),
+    linear-gradient(180deg, #fff7f2 0%, #fff1e8 48%, #fef8f4 100%);
+  color: #2e1b15;
   box-sizing: border-box;
 }
 
 .safe-bottom {
-  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(168rpx + env(safe-area-inset-bottom));
 }
 
-.card {
-  background: #fff;
+.page-shell {
+  min-height: 100vh;
+  padding: 32rpx 28rpx 0;
+}
+
+.hero-card,
+.panel-card,
+.entry-card,
+.ghost-card {
+  border-radius: 32rpx;
+  box-shadow: 0 20rpx 60rpx rgba(106, 56, 42, 0.08);
+}
+
+.hero-card {
+  background: linear-gradient(145deg, #fffaf7 0%, #ffe7db 100%);
+  border: 1rpx solid rgba(163, 80, 50, 0.08);
+}
+
+.panel-card,
+.entry-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1rpx solid rgba(132, 84, 57, 0.06);
+}
+
+.ghost-card {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.section-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #3a2018;
+}
+
+.section-desc {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #8b6555;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12rpx 22rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  line-height: 1;
+}
+
+.pill-outline {
+  color: #8f4f36;
+  background: rgba(255, 236, 226, 0.95);
+}
+
+.pill-solid {
+  color: #fff;
+  background: linear-gradient(135deg, #d5624f 0%, #bb4d3e 100%);
+}
+
+.primary-btn,
+.secondary-btn {
+  height: 84rpx;
   border-radius: 24rpx;
-  box-shadow: 0 8rpx 32rpx rgba(15, 23, 42, 0.06);
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 84rpx;
+  text-align: center;
+}
+
+.primary-btn {
+  color: #fff;
+  background: linear-gradient(135deg, #d8634f 0%, #b64838 100%);
+}
+
+.secondary-btn {
+  color: #8d4d35;
+  background: rgba(255, 233, 223, 0.95);
+}
+
+.muted-text {
+  color: #8b6555;
+}
+
+.empty-state {
+  padding: 72rpx 32rpx;
+  text-align: center;
+  color: #966d5b;
+  font-size: 26rpx;
 }

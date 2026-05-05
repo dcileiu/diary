@@ -1,0 +1,105 @@
+<view class="page-shell safe-bottom">
+  <view class="editor-head">
+    <view class="editor-title">{{isEdit ? '编辑这一笔' : '记一笔'}}</view>
+    <view class="save-chip" bindtap="onSaveTap">{{saving ? '保存中' : '保存'}}</view>
+  </view>
+
+  <view class="panel-card editor-section">
+    <view class="field-title">日期</view>
+    <picker mode="date" value="{{dateValue}}" bindchange="onDateChange">
+      <view class="picker-row">{{dateValue}}</view>
+    </picker>
+  </view>
+
+  <view class="panel-card editor-section">
+    <view class="field-title">起因（为什么生气）</view>
+    <textarea
+      class="big-textarea"
+      maxlength="200"
+      placeholder="把今天让你不开心的事写下来"
+      value="{{causeText}}"
+      bindinput="onCauseInput"
+    />
+    <view class="field-count">{{causeText.length}}/200</view>
+  </view>
+
+  <view class="panel-card editor-section">
+    <view class="field-title">对象</view>
+    <input
+      class="single-input"
+      value="{{targetName}}"
+      placeholder="某某人 / 同事 / 室友"
+      bindinput="onTargetInput"
+    />
+  </view>
+
+  <view class="panel-card editor-section">
+    <view class="field-title">气值（生气程度）</view>
+    <view class="level-row">
+      <block wx:for="{{grievanceOptions}}" wx:for-item="level" wx:key="value">
+        <view
+          class="level-chip {{grievanceLevel === level.value ? 'level-chip-active' : ''}}"
+          data-value="{{level.value}}"
+          bindtap="onGrievanceTap"
+        >
+          <view class="level-num">{{level.value}}</view>
+          <view class="level-label">{{level.label}}</view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="panel-card editor-section">
+    <view class="field-title">相关标签</view>
+    <view class="tag-flow">
+      <block wx:for="{{tagOptions}}" wx:for-item="tag" wx:key="id">
+        <view
+          class="tag-chip {{tagSelectedIds.indexOf(tag.id) > -1 ? 'tag-chip-active' : ''}}"
+          data-id="{{tag.id}}"
+          bindtap="onTagTap"
+        >
+          {{tag.name}}
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="panel-card editor-section">
+    <view class="field-title">记录心情</view>
+    <view class="mood-row">
+      <block wx:for="{{emotionOptions}}" wx:for-item="mood" wx:key="value">
+        <view
+          class="mood-chip {{emotionLevel === mood.value ? 'mood-chip-active' : ''}}"
+          data-value="{{mood.value}}"
+          bindtap="onEmotionTap"
+        >
+          <view class="mood-emoji">{{mood.emoji}}</view>
+          <view class="mood-label">{{mood.label}}</view>
+        </view>
+      </block>
+    </view>
+    <textarea
+      class="small-textarea"
+      maxlength="200"
+      placeholder="补充一下（可选）"
+      value="{{followUpText}}"
+      bindinput="onFollowUpInput"
+    />
+    <view class="field-count">{{followUpText.length}}/200</view>
+  </view>
+
+  <view class="panel-card editor-section">
+    <view class="field-title">处理状态</view>
+    <view class="status-row">
+      <block wx:for="{{statusOptions}}" wx:for-item="statusItem" wx:key="value">
+        <view
+          class="status-chip {{status === statusItem.value ? 'status-chip-active' : ''}}"
+          data-value="{{statusItem.value}}"
+          bindtap="onStatusTap"
+        >
+          {{statusItem.label}}
+        </view>
+      </block>
+    </view>
+  </view>
+</view>

@@ -1,3 +1,5 @@
+import { NextResponse } from "next/server";
+
 import { isAdminAuthConfigured } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import {
@@ -5,7 +7,6 @@ import {
   missingCriticalConfigKeys,
   missingDatabaseConfig,
 } from "@/lib/runtime-config";
-import { NextResponse } from "next/server";
 
 export async function GET() {
   const missingConfig = missingCriticalConfigKeys();
@@ -37,7 +38,7 @@ export async function GET() {
   return NextResponse.json(
     {
       ok,
-      service: "wallpaper-backend",
+      service: "grudge-diary-backend",
       environment: process.env.NODE_ENV || "development",
       checks: {
         ...checks,

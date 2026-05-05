@@ -5,13 +5,13 @@ import path from "path";
 import { MAX_IMAGE_UPLOAD_BYTES, MAX_IMAGE_UPLOAD_MB } from "./upload-limits";
 
 /**
- * 上传落盘根目录（其下含 wallpapers、avatars、user_uploads 等子目录）。
+ * 上传落盘根目录（其下含 entries、avatars、user_uploads 等子目录）。
  * - 默认：`{process.cwd()}/public/uploads`（与 `npm start` 的 cwd=项目根一致）
  * - 生产若 cwd 非项目根、或多实例挂载盘不一致，请设绝对路径，并与 Nginx `location /uploads/` 的 root/alias 指向同一 `public` 目录
  */
 const UPLOAD_ROOT = process.env.UPLOAD_STORAGE_ROOT?.trim()
   ? path.resolve(process.env.UPLOAD_STORAGE_ROOT.trim())
-  : path.join(process.cwd(), "public", "uploads");
+  : path.join(/* turbopackIgnore: true */ process.cwd(), "public", "uploads");
 
 /** 与 `savePublicUpload` 落盘根目录一致，供缩略图等模块解析原图路径 */
 export function getUploadStorageRoot(): string {
@@ -137,7 +137,7 @@ export function upgradeSameHostAvatarHttpToHttps(
   return `https://${u.host}${u.pathname}${u.search}${u.hash}`;
 }
 
-type UploadSubdir = "wallpapers" | "avatars" | "system" | "user_uploads";
+type UploadSubdir = "entries" | "avatars" | "system" | "user_uploads";
 
 /** 无 MIME 时凭扩展名识别为常见图片（与后台内容页逻辑一致） */
 const IMAGE_FILENAME_EXT =

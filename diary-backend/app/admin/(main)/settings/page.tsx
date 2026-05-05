@@ -1,41 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 
 export default function AdminSettingsPage() {
   return (
-    <div className="mx-auto w-full max-w-xl space-y-4">
+    <div className="mx-auto w-full max-w-3xl space-y-5">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
-          系统设置
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">系统信息</h1>
         <p className="text-muted-foreground text-sm">
-          示例表单布局，后续接环境变量或服务端配置。
+          当前项目已经完成第一轮“壁纸模板 → 记仇日记系统”的结构性改造，这里保留为后续接配置项、内容审核和附件策略的入口。
         </p>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">站点信息</CardTitle>
+          <CardTitle className="text-base">当前定位</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="site-name">站点名称</Label>
-            <Input
-              id="site-name"
-              className="min-h-11 text-base sm:min-h-9 sm:text-sm"
-              placeholder="壁纸小程序"
-              disabled
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="api-base">API 根路径（占位）</Label>
-            <Input
-              id="api-base"
-              className="min-h-11 text-base sm:min-h-9 sm:text-sm"
-              placeholder="/api"
-              disabled
-            />
-          </div>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <p>前端：微信小程序，围绕首页概览、条目列表、详情与新增编辑。</p>
+          <p>后端：Next.js Route Handlers + Prisma + MySQL。</p>
+          <p>后台：概览、条目、分类、标签、用户五块主业务。</p>
+          <p>下一步最适合补的是：附件上传、搜索优化、数据导出、内容审核标签。</p>
         </CardContent>
       </Card>
     </div>

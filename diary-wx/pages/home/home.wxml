@@ -1,153 +1,82 @@
-<view class="home-root">
-  <view class="nav home-nav" style="padding-top: {{statusBarHeight}}px;">
-    <view class="nav-left">
-      <view class="nav-title">去水印壁纸鸭</view>
+<view class="page-shell safe-bottom">
+  <view class="hero-card hero-block">
+    <view class="hero-top">
+      <view>
+        <view class="hero-title">记仇日记</view>
+        <view class="hero-copy">记下让你不开心的事，从此记仇有据可查。</view>
+      </view>
+      <view class="hero-setting" bindtap="onSettingsTap">设</view>
     </view>
+    <view class="hero-badge">今天也要先保护好自己</view>
   </view>
 
-  <view class="home-main safe-bottom" style="padding-top: {{navBlockHeight}}px;">
-    <view class="hero card">
-      <image class="logo" src="https://wallpaper.cdn.itianci.cn/wallpaper-wx/duck.webp" mode="aspectFill" />
-      <text class="hero-badge">一键解析</text>
-      <text class="hero-title">支持公众号、抖音、小红书</text>
-      <view class="hero-desc">
-        复制分享口令、文章链接或视频链接，粘贴后就能提取无水印图片和视频内容。仅供学习，如果没有你想解析的平台可联系客服。
+  <view class="panel-card calendar-panel">
+    <view class="calendar-head">
+      <view class="calendar-arrow" bindtap="onPrevMonth">上</view>
+      <view class="calendar-month">{{monthLabel}}</view>
+      <view class="calendar-actions">
+        <view class="pill pill-outline today-pill" bindtap="onTodayTap">今天</view>
+        <view class="calendar-arrow" bindtap="onNextMonth">下</view>
       </view>
     </view>
 
-    <view class="composer card">
-      <view class="section-head">
-        <text class="section-title">输入分享内容</text>
-        <text class="section-extra">{{inputText.length}} 字</text>
-      </view>
-      <textarea
-        class="composer-input"
-        value="{{inputText}}"
-        placeholder="把你想要解析的分享链接粘贴到这里"
-        maxlength="350"
-        auto-height="{{true}}"
-        cursor-spacing="32"
-        show-confirm-bar="{{false}}"
-        bindinput="onInputChange"
-      />
-      <view class="composer-actions">
-        <button class="action-btn action-btn-light" bindtap="onAssistTap">{{assistButtonText}}</button>
-        <button class="action-btn action-btn-light action-btn-guide" bindtap="goUsageGuide">使用教程</button>
-        <button
-          class="action-btn action-btn-primary"
-          bindtap="onExtractTap"
-          loading="{{extracting}}"
-        >
-          {{extracting ? '解析中...' : '开始解析'}}
-        </button>
-      </view>
+    <view class="weekday-row">
+      <block wx:for="{{weekDays}}" wx:for-item="day" wx:key="*this">
+        <view class="weekday-text">{{day}}</view>
+      </block>
     </view>
 
-    <view class="result card" wx:if="{{result}}">
-      <view class="section-head section-head--result">
-        <view class="result-copy">
-          <view class="section-title">
-            <view>解析结果</view>
-            <view class="result-meta">{{mediaTotal}} 个媒体</view>
-          </view>
-        </view>
-        <text class="result-chip">{{result.platformLabel}}</text>
-      </view>
-
-      <text class="result-title">{{result.title}}</text>
-
-      <view class="media-section" wx:if="{{videoList.length}}">
-        <view class="media-head">
-          <text class="media-title">视频内容</text>
-          <text class="media-count">{{videoList.length}} 个</text>
-        </view>
-        <view
-          wx:for="{{videoList}}"
-          wx:key="id"
-          class="video-card"
-        >
-          <video
-            class="video-player"
-            src="{{item.proxyUrl || item.url}}"
-            poster="{{item.posterUrl || item.posterProxyUrl}}"
-            controls
-            show-center-play-btn
-            objectFit="contain"
-          />
-          <view class="media-body media-body--video">
-            <text class="media-card-sub" wx:if="{{item.quality || item.codec}}">
-              {{item.quality}}{{item.quality && item.codec ? ' · ' : ''}}{{item.codec}}
-            </text>
-            <text class="media-warning" wx:if="{{item.warningText}}">
-              {{item.warningText}}
-            </text>
-            <view class="media-actions">
-              <button
-                class="mini-btn mini-btn-primary"
-                data-index="{{index}}"
-                bindtap="onSaveVideoTap"
-              >
-                {{item.unsupportedSave ? '复制地址' : '保存视频'}}
-              </button>
-              <button
-                class="mini-btn"
-                data-url="{{item.url}}"
-                bindtap="onCopyMediaTap"
-              >
-                复制地址
-              </button>
-            </view>
-          </view>
-        </view>
-      </view>
-
-      <view class="media-section" wx:if="{{imageList.length}}">
-        <view class="media-head">
-          <text class="media-title">图片内容</text>
-          <text class="media-count">{{imageList.length}} 张</text>
-        </view>
-        <view class="image-grid">
+    <block wx:for="{{calendarRows}}" wx:for-item="row" wx:key="index">
+      <view class="calendar-row">
+        <block wx:for="{{row}}" wx:for-item="cell" wx:key="key">
           <view
-            wx:for="{{imageList}}"
-            wx:key="id"
-            class="image-card"
+            class="calendar-cell {{cell.currentMonth ? '' : 'calendar-cell-empty'}}"
+            data-cell="{{cell}}"
+            bindtap="onDayTap"
           >
-            <image
-              class="image-card-img"
-              src="{{item.url}}"
-              mode="aspectFill"
-              data-index="{{index}}"
-              bindtap="onPreviewImageTap"
-            />
-            <view class="media-body">
-              <view class="media-actions media-actions--inline">
-                <button
-                  class="mini-btn mini-btn-primary"
-                  data-index="{{index}}"
-                  bindtap="onSaveImageTap"
-                >
-                  保存图片
-                </button>
-                <button
-                  class="mini-btn"
-                  data-url="{{item.url}}"
-                  bindtap="onCopyMediaTap"
-                >
-                  复制地址
-                </button>
-              </view>
+            <view
+              class="calendar-bubble {{cell.toneClass}} {{cell.isSelected ? 'calendar-selected' : ''}} {{cell.isToday ? 'calendar-today' : ''}}"
+            >
+              {{cell.label}}
+            </view>
+            <view wx:if="{{cell.marker && cell.currentMonth}}" class="calendar-count">
+              {{cell.marker.entryCount}}
             </view>
           </view>
+        </block>
+      </view>
+    </block>
+  </view>
+
+  <view class="entry-card focus-card" bindtap="onEntryTap">
+    <view wx:if="{{selectedEntry}}">
+      <view class="focus-date">{{selectedEntryDateText}}</view>
+      <view class="focus-content">{{selectedEntry.contentPreview}}</view>
+      <view class="focus-footer">
+        <view class="focus-stars">
+          <block wx:for="{{stars}}" wx:for-item="star" wx:key="*this">
+            <text class="focus-star {{star <= selectedEntry.grievanceLevel ? 'focus-star-on' : ''}}">★</text>
+          </block>
         </view>
+        <view class="pill pill-outline">{{selectedEntry.statusLabel}}</view>
       </view>
     </view>
+    <view wx:else class="empty-state">这个月还没有新的记仇记录，先记一笔吧。</view>
+  </view>
 
-    <view class="empty card" wx:if="{{extracted && !mediaTotal}}">
-      <text class="empty-title">这次没有提取到可下载内容</text>
-      <text class="empty-desc">
-        可以换一条完整分享链接再试一次，或者先到“壁纸图集”继续浏览内容。
-      </text>
-      <button class="hero-btn hero-btn-ghost empty-btn" bindtap="goGallery">打开壁纸图集</button>
+  <view class="primary-btn write-btn" bindtap="onWriteTap">+ 记一笔</view>
+
+  <view class="panel-card summary-panel">
+    <view class="summary-title">本月小结</view>
+    <view class="summary-grid">
+      <block wx:for="{{summaryItems}}" wx:for-item="summary" wx:key="label">
+        <view class="summary-item">
+          <view class="summary-value">
+            {{summary.value}}<text class="summary-suffix">{{summary.suffix}}</text>
+          </view>
+          <view class="summary-label">{{summary.label}}</view>
+        </view>
+      </block>
     </view>
   </view>
 </view>

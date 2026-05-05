@@ -1,15 +1,66 @@
-import { getWallpaperStore } from "@/lib/wallpaper-store";
-import { isAdminRequest } from "@/lib/admin-auth";
+import { DiaryEntryStatus } from "@prisma/client";
+
 import { adminJson } from "@/lib/admin-api-response";
-import { NextResponse } from "next/server";
+import { ensureAdmin } from "@/lib/admin-guard";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(req: Request) {
-  if (!isAdminRequest(req.headers.get("authorization"))) {
-    return NextResponse.json({ code: 401, message: "未授权" }, { status: 401 });
-  }
-  const data = await getWallpaperStore().stats();
-  return adminJson({ code: 0, data });
+  const denied = ensureAdmin(req);
+  if (denied) return denied;
+
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const [
+    userCount,
+    entryCount,
+    openEntryCount,
+    resolvedEntryCount,
+    followUpCount,
+    categoryCount,
+    tagCount,
+    todayEntryCount,
+  ] = await Promise.all([
+    prisma.wxUser.count(),
+    prisma.diaryEntry.count(),
+    prisma.diaryEntry.count({
+      where: {
+        status: { in: [DiaryEntryStatus.OPEN, DiaryEntryStatus.COOLING] },
+      },
+    }),
+    prisma.diaryEntry.count({
+      where: {
+        status: {
+          in: [
+            DiaryEntryStatus.RECONCILED,
+            DiaryEntryStatus.RELEASED,
+            DiaryEntryStatus.ARCHIVED,
+          ],
+        },
+      },
+    }),
+    prisma.diaryEntryFollowUp.count(),
+    prisma.diaryCategory.count(),
+    prisma.diaryTag.count(),
+    prisma.diaryEntry.count({
+      where: { createdAt: { gte: todayStart } },
+    }),
+  ]);
+
+  return adminJson({
+    code: 0,
+    data: {
+      userCount,
+      entryCount,
+      openEntryCount,
+      resolvedEntryCount,
+      followUpCount,
+      categoryCount,
+      tagCount,
+      todayEntryCount,
+    },
+  });
 }

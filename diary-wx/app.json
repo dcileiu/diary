@@ -1,16 +1,10 @@
 {
   "pages": [
     "pages/home/home",
-    "pages/gallery/gallery",
+    "pages/entries/entries",
+    "pages/stats/stats",
     "pages/mine/mine",
-    "packagePreview/wallpaper-preview/wallpaper-preview",
-    "packageTools/search/search",
-    "packageTools/upload/upload",
-    "packageTools/mine-list/mine-list",
-    "packageTools/points-record/points-record",
-    "packageTools/contact-service/contact-service",
-    "packageTools/privacy-policy/privacy-policy",
-    "packageTools/usage-guide/usage-guide"
+    "packageEntry/entry-editor/entry-editor"
   ],
   "networkTimeout": {
     "request": 60000,
@@ -20,25 +14,25 @@
   },
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "去水印壁纸",
-    "navigationBarBackgroundColor": "#F4FAF5",
-    "backgroundColor": "#F4FAF5",
-    "handleWebviewPreload": "auto"
+    "navigationBarTitleText": "记仇日记",
+    "navigationBarBackgroundColor": "#FFF4EE",
+    "backgroundColor": "#FFF4EE",
+    "backgroundTextStyle": "dark"
   },
   "tabBar": {
     "custom": true,
-    "color": "#ffffff",
-    "selectedColor": "#4A9F5A",
-    "backgroundColor": "#ffffff",
-    "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/home/home",
         "text": "首页"
       },
       {
-        "pagePath": "pages/gallery/gallery",
-        "text": "壁纸图集"
+        "pagePath": "pages/entries/entries",
+        "text": "记仇本"
+      },
+      {
+        "pagePath": "pages/stats/stats",
+        "text": "统计"
       },
       {
         "pagePath": "pages/mine/mine",

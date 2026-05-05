@@ -2,7 +2,7 @@ import "server-only";
 
 import qiniu from "qiniu";
 
-type UploadSubdir = "wallpapers" | "avatars" | "system" | "user_uploads";
+type UploadSubdir = "entries" | "avatars" | "system" | "user_uploads";
 
 export function qiniuConfig() {
   const accessKey = process.env.QINIU_ACCESS_KEY?.trim();
@@ -12,6 +12,7 @@ export function qiniuConfig() {
   const prefix = (process.env.QINIU_UPLOAD_PREFIX ?? "uploads")
     .trim()
     .replace(/^\/+|\/+$/g, "");
+
   if (!accessKey || !secretKey || !bucket) return null;
   return { accessKey, secretKey, bucket, zone: zone || null, prefix };
 }
@@ -20,23 +21,26 @@ function qiniuZoneFrom(
   raw: string | null,
 ): (typeof qiniu.zone)[keyof typeof qiniu.zone] | null {
   if (!raw) return null;
-  const z = raw.trim().toLowerCase();
-  if (z === "z0" || z.includes("huadong") || z.includes("east"))
+
+  const zone = raw.trim().toLowerCase();
+  if (zone === "z0" || zone.includes("huadong") || zone.includes("east")) {
     return qiniu.zone.Zone_z0;
-  if (z === "z1" || z.includes("huabei") || z.includes("north"))
+  }
+  if (zone === "z1" || zone.includes("huabei") || zone.includes("north")) {
     return qiniu.zone.Zone_z1;
-  if (z === "z2" || z.includes("huanan") || z.includes("south"))
+  }
+  if (zone === "z2" || zone.includes("huanan") || zone.includes("south")) {
     return qiniu.zone.Zone_z2;
-  if (z === "na0" || z.includes("na")) return qiniu.zone.Zone_na0;
-  if (z === "as0" || z.includes("as")) return qiniu.zone.Zone_as0;
+  }
+  if (zone === "na0" || zone.includes("na")) return qiniu.zone.Zone_na0;
+  if (zone === "as0" || zone.includes("as")) return qiniu.zone.Zone_as0;
   return null;
 }
 
 export function shouldUploadToQiniu(subdir: UploadSubdir): boolean {
-  // 用户头像明确保留本地；system 也先保留本地（你当前 system 图标在仓库内）
   if (subdir === "avatars") return false;
   if (subdir === "system") return false;
-  return subdir === "wallpapers" || subdir === "user_uploads";
+  return subdir === "entries" || subdir === "user_uploads";
 }
 
 export async function uploadToQiniu(
@@ -46,6 +50,7 @@ export async function uploadToQiniu(
 ): Promise<void> {
   const cfg = qiniuConfig();
   if (!cfg) throw new Error("Qiniu config missing");
+
   const mac = new qiniu.auth.digest.Mac(cfg.accessKey, cfg.secretKey);
   const putPolicy = new qiniu.rs.PutPolicy({
     scope: `${cfg.bucket}:${key}`,
@@ -64,37 +69,39 @@ export async function uploadToQiniu(
       key,
       buf,
       putExtra,
-      function (respErr, _respBody, respInfo) {
+      function (respErr, respBody, respInfo) {
         if (respErr) {
           reject(respErr);
           return;
         }
+
         const code = respInfo?.statusCode ?? 0;
         if (code && code >= 300) {
           let detail = "";
           try {
             detail =
-              typeof _respBody === "string"
-                ? _respBody
-                : _respBody
-                  ? JSON.stringify(_respBody)
+              typeof respBody === "string"
+                ? respBody
+                : respBody
+                  ? JSON.stringify(respBody)
                   : "";
           } catch {
             detail = "";
           }
+
           const msg = respInfo?.error
             ? String(respInfo.error)
             : `Qiniu upload failed (HTTP ${code})`;
           reject(
             new Error(
-              detail ? `${msg} · respBody=${detail} · key=${key}` : `${msg} · key=${key}`,
+              detail ? `${msg}; respBody=${detail}; key=${key}` : `${msg}; key=${key}`,
             ),
           );
           return;
         }
+
         resolve();
       },
     );
   });
 }
-

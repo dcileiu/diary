@@ -7,109 +7,145 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model WxUser {
-  id           Int      @id @default(autoincrement())
-  openId       String   @unique @map("open_id") @db.VarChar(64)
-  accessToken  String   @unique @map("access_token") @db.VarChar(128)
-  nickname     String   @db.VarChar(255)
-  avatar       String   @db.VarChar(512)
-  color        String   @db.VarChar(32)
-  points       Int      @default(2)
-  isVip        String   @map("is_vip") @db.VarChar(8)
-  collections  UserCollection[]
-  downloads    UserDownloadLog[]
-  pointRecords PointRecord[]
+enum DiaryEntryStatus {
+  OPEN
+  COOLING
+  RECONCILED
+  RELEASED
+  ARCHIVED
+}
 
+enum DiaryFollowUpType {
+  NOTE
+  REFLECTION
+  ACTION
+  RESULT
+}
+
+model WxUser {
+  id                 Int                    @id @default(autoincrement())
+  openId             String                 @unique @map("open_id") @db.VarChar(64)
+  accessToken        String                 @unique @map("access_token") @db.VarChar(128)
+  nickname           String                 @default("记仇用户") @db.VarChar(64)
+  avatar             String                 @default("") @db.VarChar(512)
+  bio                String                 @default("") @db.VarChar(255)
+  totalEntryCount    Int                    @default(0) @map("total_entry_count")
+  activeEntryCount   Int                    @default(0) @map("active_entry_count")
+  resolvedEntryCount Int                    @default(0) @map("resolved_entry_count")
+  lastEntryAt        DateTime?              @map("last_entry_at")
+  createdAt          DateTime               @default(now()) @map("created_at")
+  updatedAt          DateTime               @updatedAt @map("updated_at")
+  entries            DiaryEntry[]
+  followUps          DiaryEntryFollowUp[]
+  attachments        DiaryEntryAttachment[]
+
+  @@index([createdAt])
+  @@index([lastEntryAt])
   @@map("wx_user")
 }
 
-model Wallpaper {
-  id          Int      @id @default(autoincrement())
-  groupCode   String   @map("group_code") @db.VarChar(6)
-  fileName    String   @map("file_name") @db.VarChar(255)
-  type        String   @db.VarChar(64)
-  /** 图片主题（同批多图可共用同一主题） */
-  theme       String   @default("") @db.VarChar(255)
-  title       String   @db.VarChar(255)
-  tags        String   @db.VarChar(512)
-  hotScore    Int      @default(0) @map("hot_score")
-  /** 被收藏总数（user_collection 冗余计数，便于列表快速展示） */
-  collectCount Int     @default(0) @map("collect_count")
-  downloading Int      @default(0)
-  avatarList  Json?    @map("avatar_list")
-  /** 小程序首页「每日精选」轮播；未勾选时 dailyFeaturedSort 应为 0 */
-  dailyFeatured     Boolean @default(false) @map("daily_featured")
-  /** 轮播顺序，升序靠前 */
-  dailyFeaturedSort Int     @default(0) @map("daily_featured_sort")
-  /** true：仅后台可见，小程序列表/首页等不返回 */
-  hidden            Boolean @default(false)
+model DiaryCategory {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique @db.VarChar(64)
+  description String       @default("") @db.VarChar(255)
+  color       String       @default("#E85D75") @db.VarChar(16)
+  sortOrder   Int          @default(0) @map("sort_order")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  entries     DiaryEntry[]
 
-  collections UserCollection[]
-  downloads   UserDownloadLog[]
-
-  @@index([type])
-  @@index([hotScore])
-  @@index([collectCount])
-  @@index([groupCode])
-  @@index([dailyFeatured, dailyFeaturedSort])
-  @@map("wallpaper")
+  @@index([sortOrder])
+  @@map("diary_category")
 }
 
-model UserCollection {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @map("user_id")
-  wallpaperId Int      @map("wallpaper_id")
-  createdAt   DateTime @default(now()) @map("created_at")
+model DiaryTag {
+  id        Int             @id @default(autoincrement())
+  name      String          @unique @db.VarChar(64)
+  color     String          @default("#577590") @db.VarChar(16)
+  sortOrder Int             @default(0) @map("sort_order")
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+  entryTags DiaryEntryTag[]
 
-  user      WxUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  wallpaper Wallpaper @relation(fields: [wallpaperId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, wallpaperId])
-  @@index([userId])
-  @@map("user_collection")
+  @@index([sortOrder])
+  @@map("diary_tag")
 }
 
-model UserDownloadLog {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @map("user_id")
-  wallpaperId Int      @map("wallpaper_id")
-  createdAt   DateTime @default(now()) @map("created_at")
+model DiaryEntry {
+  id             Int                    @id @default(autoincrement())
+  userId         Int                    @map("user_id")
+  categoryId     Int?                   @map("category_id")
+  title          String                 @db.VarChar(120)
+  content        String                 @db.Text
+  targetName     String                 @default("") @map("target_name") @db.VarChar(64)
+  targetRelation String                 @default("") @map("target_relation") @db.VarChar(64)
+  location       String                 @default("") @db.VarChar(128)
+  grievanceLevel Int                    @default(3) @map("grievance_level")
+  emotionLevel   Int                    @default(3) @map("emotion_level")
+  followUpCount  Int                    @default(0) @map("follow_up_count")
+  status         DiaryEntryStatus       @default(OPEN)
+  isPinned       Boolean                @default(false) @map("is_pinned")
+  happenedAt     DateTime               @map("happened_at")
+  settledAt      DateTime?              @map("settled_at")
+  lastFollowUpAt DateTime?              @map("last_follow_up_at")
+  createdAt      DateTime               @default(now()) @map("created_at")
+  updatedAt      DateTime               @updatedAt @map("updated_at")
+  user           WxUser                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category       DiaryCategory?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags           DiaryEntryTag[]
+  attachments    DiaryEntryAttachment[]
+  followUps      DiaryEntryFollowUp[]
 
-  user      WxUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  wallpaper Wallpaper @relation(fields: [wallpaperId], references: [id], onDelete: Cascade)
+  @@index([userId, status, happenedAt])
+  @@index([categoryId, happenedAt])
+  @@index([isPinned, createdAt])
+  @@index([lastFollowUpAt])
+  @@map("diary_entry")
+}
 
+model DiaryEntryTag {
+  id        Int        @id @default(autoincrement())
+  entryId   Int        @map("entry_id")
+  tagId     Int        @map("tag_id")
+  createdAt DateTime   @default(now()) @map("created_at")
+  entry     DiaryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  tag       DiaryTag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([entryId, tagId])
+  @@index([tagId])
+  @@map("diary_entry_tag")
+}
+
+model DiaryEntryAttachment {
+  id        Int        @id @default(autoincrement())
+  entryId   Int        @map("entry_id")
+  userId    Int        @map("user_id")
+  fileUrl   String     @map("file_url") @db.VarChar(512)
+  fileName  String     @default("") @map("file_name") @db.VarChar(255)
+  fileType  String     @default("image") @map("file_type") @db.VarChar(32)
+  sortOrder Int        @default(0) @map("sort_order")
+  createdAt DateTime   @default(now()) @map("created_at")
+  entry     DiaryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  user      WxUser     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([entryId, sortOrder])
   @@index([userId, createdAt])
-  @@map("user_download_log")
+  @@map("diary_entry_attachment")
 }
 
-model PointRecord {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @map("user_id")
-  content   String   @db.VarChar(255)
-  points    Int
-  type      String   @db.VarChar(16)
-  createdAt DateTime @default(now()) @map("created_at")
+model DiaryEntryFollowUp {
+  id           Int               @id @default(autoincrement())
+  entryId      Int               @map("entry_id")
+  userId       Int               @map("user_id")
+  type         DiaryFollowUpType @default(NOTE)
+  content      String            @db.Text
+  emotionDelta Int               @default(0) @map("emotion_delta")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+  entry        DiaryEntry        @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  user         WxUser            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user WxUser @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  @@index([entryId, createdAt])
   @@index([userId, createdAt])
-  @@map("point_record")
-}
-
-model WallpaperCategory {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique @db.VarChar(64)
-  sortOrder Int      @default(0) @map("sort_order")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@map("wallpaper_category")
-}
-
-model WallpaperTag {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique @db.VarChar(64)
-  sortOrder Int      @default(0) @map("sort_order")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@map("wallpaper_tag")
+  @@map("diary_entry_follow_up")
 }

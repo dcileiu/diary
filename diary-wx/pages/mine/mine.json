@@ -1,7 +1,4 @@
 {
-  "usingComponents": {},
-  "navigationStyle": "custom",
-  "navigationBarTitleText": "壁纸图集侠",
-  "enablePullDownRefresh": true,
-  "backgroundTextStyle": "dark"
+  "navigationBarTitleText": "我的",
+  "enablePullDownRefresh": true
 }

@@ -1,0 +1,152 @@
+.entries-top {
+  padding: 26rpx 22rpx;
+}
+
+.entries-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.entries-title {
+  font-size: 54rpx;
+  font-weight: 800;
+  color: #362018;
+}
+
+.entries-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.entries-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: rgba(255, 242, 236, 0.96);
+  text-align: center;
+  line-height: 64rpx;
+  font-size: 30rpx;
+  color: #7f5546;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 20rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 76rpx;
+  padding: 0 24rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1rpx solid rgba(165, 96, 63, 0.08);
+}
+
+.search-btn {
+  padding: 0 24rpx;
+  height: 76rpx;
+  border-radius: 24rpx;
+  line-height: 76rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #dd7059 0%, #bc4f40 100%);
+}
+
+.tab-row {
+  display: flex;
+  gap: 14rpx;
+  margin-top: 22rpx;
+}
+
+.tab-chip {
+  min-width: 144rpx;
+  padding: 16rpx 0;
+  border-radius: 999rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #8b6454;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1rpx solid rgba(165, 96, 63, 0.08);
+}
+
+.tab-chip-active {
+  color: #9f3f4e;
+  background: rgba(255, 207, 219, 0.92);
+}
+
+.entries-list {
+  margin-top: 24rpx;
+  display: grid;
+  gap: 20rpx;
+}
+
+.book-card {
+  padding: 24rpx;
+}
+
+.book-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.book-date {
+  display: inline-flex;
+  padding: 10rpx 18rpx;
+  border-radius: 16rpx;
+  background: rgba(252, 239, 232, 0.9);
+  color: #7c5040;
+  font-size: 24rpx;
+}
+
+.book-content {
+  margin-top: 18rpx;
+  font-size: 30rpx;
+  line-height: 1.6;
+  color: #35211a;
+}
+
+.book-stars {
+  margin-top: 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.book-star-label {
+  font-size: 24rpx;
+  color: #8f6557;
+}
+
+.book-star {
+  font-size: 24rpx;
+  color: #e7c7c4;
+}
+
+.book-star-on {
+  color: #f17d97;
+}
+
+.floating-write {
+  position: fixed;
+  right: 28rpx;
+  bottom: calc(180rpx + env(safe-area-inset-bottom));
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ed8296 0%, #e25c78 100%);
+  color: #fff;
+  text-align: center;
+  line-height: 104rpx;
+  font-size: 56rpx;
+  box-shadow: 0 20rpx 40rpx rgba(216, 92, 120, 0.3);
+}
+
+.loading-text {
+  text-align: center;
+  color: #8a6558;
+  font-size: 24rpx;
+}

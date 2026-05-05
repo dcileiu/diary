@@ -1,0 +1,57 @@
+<view class="page-shell safe-bottom">
+  <view class="stats-head">
+    <view class="stats-title">统计</view>
+    <picker mode="date" fields="month" value="{{currentMonth}}" bindchange="onMonthChange">
+      <view class="month-picker">{{currentMonth}}</view>
+    </picker>
+  </view>
+
+  <view class="hero-card stats-summary">
+    <view>
+      <view class="summary-label">本月记仇次数</view>
+      <view class="summary-big">{{totalCount}}<text class="summary-unit">次</text></view>
+      <view class="summary-delta">
+        比上月 <text class="{{deltaClass}}">{{deltaText}}</text>
+      </view>
+    </view>
+    <view class="summary-sign">气数</view>
+  </view>
+
+  <view class="panel-card chart-panel">
+    <view class="section-title">生气程度分布</view>
+    <view class="chart-layout">
+      <view class="ring-shell">
+        <view class="ring-chart" style="{{ringStyle}}"></view>
+        <view class="ring-hole"></view>
+      </view>
+      <view class="chart-legend">
+        <block wx:for="{{distribution}}" wx:for-item="dist" wx:key="key">
+          <view class="legend-row">
+            <view class="legend-left">
+              <view class="legend-dot" style="background: {{dist.color}};"></view>
+              <text class="legend-label">{{dist.label}}</text>
+            </view>
+            <text class="legend-value">{{dist.percent}}%</text>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel-card top-panel">
+    <view class="section-title">记仇对象 TOP3</view>
+    <view class="top-list">
+      <block wx:for="{{topTargets}}" wx:for-item="target" wx:key="name">
+        <view class="top-row">
+          <view class="top-rank">{{index + 1}}</view>
+          <view class="top-name">{{target.name}}</view>
+          <view class="top-bar">
+            <view class="top-bar-fill" style="width: {{target.percent}}%;"></view>
+          </view>
+          <view class="top-count">{{target.count}}次</view>
+        </view>
+      </block>
+    </view>
+    <view wx:if="{{!topTargets.length && !loading}}" class="empty-state">这个月还没有统计数据。</view>
+  </view>
+</view>

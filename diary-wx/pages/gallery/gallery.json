@@ -1,7 +1,0 @@
-{
-  "usingComponents": {},
-  "navigationStyle": "custom",
-  "navigationBarTitleText": "壁纸图集",
-  "enablePullDownRefresh": true,
-  "backgroundTextStyle": "dark"
-}

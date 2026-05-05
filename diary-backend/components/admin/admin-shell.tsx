@@ -4,11 +4,10 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  ImageIcon,
+  BookHeart,
   LayoutDashboard,
   LogOut,
   Settings2,
-  Tag,
   Tags,
   Users,
 } from "lucide-react";
@@ -55,10 +54,10 @@ import { cn } from "@/lib/utils";
 const nav = [
   { href: "/admin", label: "概览", icon: LayoutDashboard, match: /^\/admin\/?$/ },
   {
-    href: "/admin/content",
-    label: "内容管理",
-    icon: ImageIcon,
-    match: /^\/admin\/content/,
+    href: "/admin/entries",
+    label: "条目管理",
+    icon: BookHeart,
+    match: /^\/admin\/entries/,
   },
   {
     href: "/admin/categories",
@@ -69,13 +68,13 @@ const nav = [
   {
     href: "/admin/tags",
     label: "标签管理",
-    icon: Tag,
+    icon: Tags,
     match: /^\/admin\/tags/,
   },
   { href: "/admin/users", label: "用户", icon: Users, match: /^\/admin\/users/ },
   {
     href: "/admin/settings",
-    label: "系统设置",
+    label: "系统信息",
     icon: Settings2,
     match: /^\/admin\/settings/,
   },
@@ -87,23 +86,21 @@ function adminBreadcrumbs(pathname: string) {
   const crumbs: { label: string; href: string }[] = [
     { label: "后台", href: "/admin" },
   ];
-  const rest = segments.slice(1);
   const labels: Record<string, string> = {
-    content: "内容管理",
+    entries: "条目管理",
     categories: "分类管理",
     tags: "标签管理",
     users: "用户",
-    settings: "系统设置",
+    settings: "系统信息",
   };
   let acc = "/admin";
-  for (const seg of rest) {
+  for (const seg of segments.slice(1)) {
     acc += `/${seg}`;
     crumbs.push({ label: labels[seg] ?? seg, href: acc });
   }
   return crumbs;
 }
 
-/** 移动端切换路由后收起侧栏抽屉，避免遮挡内容 */
 function MobileSidebarAutoClose({ pathname }: { pathname: string }) {
   const { setOpenMobile } = useSidebar();
   React.useEffect(() => {
@@ -131,12 +128,12 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
         <SidebarHeader className="gap-3.5 p-2">
           <div className="flex items-center gap-2 px-2 py-1.5 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-semibold text-sm">
-              W
+              仇
             </div>
             <div className="grid min-w-0 flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-              <span className="truncate font-semibold">壁纸运营后台</span>
+              <span className="truncate font-semibold">记仇日记后台</span>
               <span className="truncate text-xs text-muted-foreground">
-                支持手机浏览器访问
+                小程序与后台共用一套数据模型
               </span>
             </div>
           </div>
@@ -188,10 +185,10 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
                 render={<Link href="/" />}
               >
                 <span className="text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
-                  ← 站点首页
+                  → 返回站点首页
                 </span>
                 <span className="hidden group-data-[collapsible=icon]:block text-xs">
-                  ←
+                  →
                 </span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -220,15 +217,17 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
                   {currentLabel}
                 </BreadcrumbPage>
               </BreadcrumbItem>
-              {crumbs.map((c, i) => (
-                <React.Fragment key={c.href}>
-                  {i > 0 ? <BreadcrumbSeparator className="hidden sm:inline" /> : null}
+              {crumbs.map((item, index) => (
+                <React.Fragment key={item.href}>
+                  {index > 0 ? (
+                    <BreadcrumbSeparator className="hidden sm:inline" />
+                  ) : null}
                   <BreadcrumbItem className="hidden min-w-0 sm:inline-block">
-                    {i === crumbs.length - 1 ? (
-                      <BreadcrumbPage className="truncate">{c.label}</BreadcrumbPage>
+                    {index === crumbs.length - 1 ? (
+                      <BreadcrumbPage className="truncate">{item.label}</BreadcrumbPage>
                     ) : (
-                      <BreadcrumbLink render={<Link href={c.href} />}>
-                        {c.label}
+                      <BreadcrumbLink render={<Link href={item.href} />}>
+                        {item.label}
                       </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
@@ -250,10 +249,8 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuLabel>管理员</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => router.push("/admin/settings")}
-              >
-                设置
+              <DropdownMenuItem onClick={() => router.push("/admin/settings")}>
+                系统信息
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => adminLogout(router)}>
                 退出登录

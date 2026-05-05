@@ -5,10 +5,11 @@ import { cn } from "@/lib/utils";
 export default function Home() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">壁纸小程序 · 全栈</h1>
-        <p className="text-muted-foreground text-sm max-w-md">
-          Next.js App Router · shadcn/ui 管理后台 · Route Handlers 可对接小程序同名 API
+      <div className="space-y-2 text-center">
+        <h1 className="text-3xl font-semibold tracking-tight">记仇日记全栈系统</h1>
+        <p className="text-muted-foreground max-w-xl text-sm">
+          现在这个项目已经围绕微信小程序记仇日记重组：前端是小程序，后端是
+          Next.js + Prisma，后台管理用于查看用户、条目、分类和标签。
         </p>
       </div>
       <div className="flex flex-wrap items-center justify-center gap-3">
@@ -21,7 +22,7 @@ export default function Home() {
           target="_blank"
           rel="noreferrer"
         >
-          健康检查 JSON
+          查看健康检查
         </Link>
       </div>
     </div>

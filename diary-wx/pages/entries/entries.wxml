@@ -1,0 +1,61 @@
+<view class="page-shell safe-bottom">
+  <view class="panel-card entries-top">
+    <view class="entries-title-row">
+      <view class="entries-title">记仇本</view>
+      <view class="entries-actions">
+        <view class="entries-icon" bindtap="onSearchToggle">搜</view>
+        <view class="entries-icon" bindtap="onWriteTap">+</view>
+      </view>
+    </view>
+
+    <view wx:if="{{searchVisible}}" class="search-bar">
+      <input
+        class="search-input"
+        placeholder="搜索关键词"
+        value="{{keyword}}"
+        bindinput="onKeywordInput"
+        confirm-type="search"
+        bindconfirm="onSearchConfirm"
+      />
+      <view class="search-btn" bindtap="onSearchConfirm">搜索</view>
+    </view>
+
+    <view class="tab-row">
+      <block wx:for="{{tabs}}" wx:for-item="tab" wx:key="key">
+        <view
+          class="tab-chip {{activeTab === tab.key ? 'tab-chip-active' : ''}}"
+          data-key="{{tab.key}}"
+          bindtap="onTabTap"
+        >
+          {{tab.label}}
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="entries-list">
+    <block wx:for="{{list}}" wx:for-item="entry" wx:key="id">
+      <view class="entry-card book-card" data-id="{{entry.id}}" bindtap="onEntryTap">
+        <view class="book-header">
+          <view class="book-date">{{entry.happenedAtLabel}}</view>
+          <view class="pill pill-outline">{{entry.statusLabel}}</view>
+        </view>
+        <view class="book-content">{{entry.contentPreview}}</view>
+        <view class="book-stars">
+          <text class="book-star-label">气值：</text>
+          <block wx:for="{{stars}}" wx:for-item="star" wx:key="*this">
+            <text class="book-star {{star <= entry.grievanceLevel ? 'book-star-on' : ''}}">★</text>
+          </block>
+        </view>
+      </view>
+    </block>
+
+    <view wx:if="{{!loading && !list.length}}" class="empty-state">
+      这里还是空的，去把今天不开心的事记下来吧。
+    </view>
+
+    <view wx:if="{{loading}}" class="loading-text">加载中...</view>
+  </view>
+
+  <view class="floating-write" bindtap="onWriteTap">+</view>
+</view>

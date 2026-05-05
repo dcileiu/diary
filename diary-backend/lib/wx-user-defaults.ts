@@ -9,15 +9,15 @@ function randomAlnum(n: number): string {
   return s;
 }
 
-/** Current default avatar for newly registered mini-program users. */
-export const MINI_PROGRAM_DEFAULT_AVATAR_URL =
-  "https://wallpaper.cdn.itianci.cn/wallpaper-wx/default-avatar.webp";
+/** Current default avatar path for newly registered mini-program users. */
+export const MINI_PROGRAM_DEFAULT_AVATAR_PATH =
+  "/uploads/system/default_avatar.jpg";
 
-/** Legacy site-hosted default avatar path kept for old-user migration. */
+/** Legacy site-hosted default avatar path kept for compatibility. */
 export const MINI_PROGRAM_LEGACY_DEFAULT_AVATAR_PATH =
   "/uploads/system/default_avatar.jpg";
 
-/** New user nickname format: 大侠 + 5 alphanumeric chars. */
+/** New user nickname format: 记仇用户 + 5 alphanumeric chars. */
 export function defaultMiniProgramNickname(): string {
-  return `大侠${randomAlnum(5)}`;
+  return `记仇用户${randomAlnum(5)}`;
 }
