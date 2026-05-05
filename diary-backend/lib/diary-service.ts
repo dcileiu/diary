@@ -12,7 +12,7 @@ import {
   DIARY_STATUS_LABEL_MAP,
   DIARY_ENTRY_STATUS_OPTIONS,
 } from "@/lib/diary-constants";
-import { absoluteAssetUrl } from "@/lib/local-upload";
+import { absoluteAssetUrl } from "@/lib/public-origin";
 import { prisma } from "@/lib/prisma";
 import {
   defaultMiniProgramNickname,

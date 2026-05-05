@@ -21,7 +21,7 @@ function applyNoStore(res: NextResponse) {
   return res;
 }
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
   if (pathname.startsWith("/api/v1")) {

@@ -1,20 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /** 缩短客户端 Router Cache 保留时间（与 admin 段 force-dynamic 配合） */
+  turbopack: {
+    root: process.cwd(),
+  },
   experimental: {
     staleTimes: {
       dynamic: 0,
       static: 30,
     },
   },
-
-  /**
-   * 与 middleware 双保险：页面与 API 响应头禁止缓存。
-   * 不含 _next/static、_next/image，避免拖慢带 hash 的 JS/CSS。
-   */
   async headers() {
-    const noStoreHtml = [
+    const noStoreHeaders = [
       {
         key: "Cache-Control",
         value:
@@ -23,26 +20,15 @@ const nextConfig: NextConfig = {
       { key: "Pragma", value: "no-cache" },
       { key: "Expires", value: "0" },
     ] as const;
+
     return [
-      {
-        source: "/",
-        headers: [...noStoreHtml],
-      },
-      {
-        source: "/api/admin/:path*",
-        headers: [...noStoreHtml],
-      },
-      {
-        source: "/api/v1/:path*",
-        headers: [...noStoreHtml],
-      },
-      {
-        source: "/admin/:path*",
-        headers: [...noStoreHtml],
-      },
+      { source: "/", headers: [...noStoreHeaders] },
+      { source: "/api/admin/:path*", headers: [...noStoreHeaders] },
+      { source: "/api/v1/:path*", headers: [...noStoreHeaders] },
+      { source: "/admin/:path*", headers: [...noStoreHeaders] },
       {
         source: "/((?!_next/static|_next/image|favicon.ico|uploads/).*)",
-        headers: [...noStoreHtml],
+        headers: [...noStoreHeaders],
       },
     ];
   },
