@@ -1,0 +1,15 @@
+page {
+  background-color: #f4faf5;
+  color: #1a1a1a;
+  box-sizing: border-box;
+}
+
+.safe-bottom {
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+}
+
+.card {
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 32rpx rgba(15, 23, 42, 0.06);
+}

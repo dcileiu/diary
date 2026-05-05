@@ -1,0 +1,15 @@
+<view class="tabbar-wrapper">
+  <view class="button-wrap">
+    <view class="glass-button">
+      <block wx:for="{{list}}" wx:key="pagePath">
+        <view
+          class="tab-span {{selected === index ? 'active' : ''}}"
+          data-index="{{index}}"
+          bindtap="switchTab"
+        >
+          {{item.text}}
+        </view>
+      </block>
+    </view>
+  </view>
+</view>

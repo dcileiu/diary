@@ -1,0 +1,142 @@
+/**
+ * 收藏心形（由 Web 版 checkbox+SVG 改为小程序：class 切换 + 双 SVG）
+ * --heart-color 与 SVG fill 一致
+ */
+.heart-like {
+  --heart-color: rgb(255, 91, 137);
+  position: relative;
+  width: 34rpx;
+  height: 34rpx;
+  flex-shrink: 0;
+}
+
+.heart-like-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heart-like-img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.heart-like-outline {
+  opacity: 1;
+  z-index: 1;
+}
+
+.heart-like-filled {
+  opacity: 0;
+  transform: scale(0);
+  z-index: 2;
+}
+
+/* 已收藏且非点击动画中：实心常驻 */
+.heart-like--on:not(.heart-like--pop) .heart-like-filled {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.heart-like--on:not(.heart-like--pop) .heart-like-outline {
+  opacity: 0;
+}
+
+/* 未收藏且未播放弹出：仅描边 */
+.heart-like:not(.heart-like--on):not(.heart-like--pop) .heart-like-filled {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.heart-like:not(.heart-like--on):not(.heart-like--pop) .heart-like-outline {
+  opacity: 1;
+}
+
+/* 点击瞬间：描边淡出 + 实心弹出（与原版 keyframes-svg-filled 一致） */
+.heart-like--pop:not(.heart-like--on) .heart-like-outline {
+  animation: heart-outline-out 0.3s forwards;
+}
+
+.heart-like--pop .heart-like-filled {
+  animation: heart-filled-pop 1s forwards;
+}
+
+.heart-like--pop .heart-like-celebrate {
+  display: block;
+  animation: heart-celebrate 0.5s forwards;
+}
+
+.heart-like-celebrate {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6rpx;
+  height: 6rpx;
+  margin: -3rpx 0 0 -3rpx;
+  border-radius: 50%;
+  background: var(--heart-color);
+  box-shadow:
+    -14rpx -12rpx 0 0 rgba(255, 91, 137, 0.55),
+    14rpx -10rpx 0 0 rgba(255, 91, 137, 0.45),
+    -12rpx 14rpx 0 0 rgba(255, 91, 137, 0.4),
+    12rpx 12rpx 0 0 rgba(255, 91, 137, 0.5),
+    0 -18rpx 0 0 rgba(255, 91, 137, 0.35),
+    0 16rpx 0 0 rgba(255, 91, 137, 0.35);
+  pointer-events: none;
+  z-index: 3;
+}
+
+@keyframes heart-outline-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes heart-filled-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+    filter: brightness(1.35);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    filter: none;
+  }
+}
+
+@keyframes heart-celebrate {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.35);
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* 预览页底栏：稍大心形 */
+.heart-like--preview {
+  width: 38rpx;
+  height: 38rpx;
+}

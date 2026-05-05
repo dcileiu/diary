@@ -1,0 +1,15 @@
+<view class="cs-page safe-bottom">
+  <view class="cs-card card">
+    <text class="cs-label">客服 QQ</text>
+    <text class="cs-qq" selectable="true">{{serviceQq}}</text>
+    <view
+      class="cs-copy-btn"
+      hover-class="cs-copy-btn-hover"
+      hover-stay-time="80"
+      bindtap="onCopyQq"
+    >
+      <text class="cs-copy-btn-text">复制号码</text>
+    </view>
+  </view>
+  <text class="cs-hint">添加 QQ 时请备注「壁纸图集侠」，方便尽快通过。</text>
+</view>

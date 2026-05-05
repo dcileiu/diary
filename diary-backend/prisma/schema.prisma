@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model WxUser {
+  id           Int      @id @default(autoincrement())
+  openId       String   @unique @map("open_id") @db.VarChar(64)
+  accessToken  String   @unique @map("access_token") @db.VarChar(128)
+  nickname     String   @db.VarChar(255)
+  avatar       String   @db.VarChar(512)
+  color        String   @db.VarChar(32)
+  points       Int      @default(2)
+  isVip        String   @map("is_vip") @db.VarChar(8)
+  collections  UserCollection[]
+  downloads    UserDownloadLog[]
+  pointRecords PointRecord[]
+
+  @@map("wx_user")
+}
+
+model Wallpaper {
+  id          Int      @id @default(autoincrement())
+  groupCode   String   @map("group_code") @db.VarChar(6)
+  fileName    String   @map("file_name") @db.VarChar(255)
+  type        String   @db.VarChar(64)
+  /** 图片主题（同批多图可共用同一主题） */
+  theme       String   @default("") @db.VarChar(255)
+  title       String   @db.VarChar(255)
+  tags        String   @db.VarChar(512)
+  hotScore    Int      @default(0) @map("hot_score")
+  /** 被收藏总数（user_collection 冗余计数，便于列表快速展示） */
+  collectCount Int     @default(0) @map("collect_count")
+  downloading Int      @default(0)
+  avatarList  Json?    @map("avatar_list")
+  /** 小程序首页「每日精选」轮播；未勾选时 dailyFeaturedSort 应为 0 */
+  dailyFeatured     Boolean @default(false) @map("daily_featured")
+  /** 轮播顺序，升序靠前 */
+  dailyFeaturedSort Int     @default(0) @map("daily_featured_sort")
+  /** true：仅后台可见，小程序列表/首页等不返回 */
+  hidden            Boolean @default(false)
+
+  collections UserCollection[]
+  downloads   UserDownloadLog[]
+
+  @@index([type])
+  @@index([hotScore])
+  @@index([collectCount])
+  @@index([groupCode])
+  @@index([dailyFeatured, dailyFeaturedSort])
+  @@map("wallpaper")
+}
+
+model UserCollection {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  wallpaperId Int      @map("wallpaper_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user      WxUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallpaper Wallpaper @relation(fields: [wallpaperId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, wallpaperId])
+  @@index([userId])
+  @@map("user_collection")
+}
+
+model UserDownloadLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  wallpaperId Int      @map("wallpaper_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user      WxUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallpaper Wallpaper @relation(fields: [wallpaperId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("user_download_log")
+}
+
+model PointRecord {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  content   String   @db.VarChar(255)
+  points    Int
+  type      String   @db.VarChar(16)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user WxUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("point_record")
+}
+
+model WallpaperCategory {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(64)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("wallpaper_category")
+}
+
+model WallpaperTag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(64)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("wallpaper_tag")
+}

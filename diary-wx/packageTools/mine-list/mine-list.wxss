@@ -1,0 +1,77 @@
+@import '../../styles/heart-like.wxss';
+
+.ml-root {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 48rpx;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+.ml-waterfall {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20rpx;
+}
+
+.ml-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.ml-card {
+  overflow: hidden;
+  position: relative;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 28rpx rgba(15, 23, 42, 0.08);
+}
+
+.ml-card-img {
+  width: 100%;
+  display: block;
+}
+
+.ml-card-meta {
+  position: absolute;
+  left: 12rpx;
+  bottom: 12rpx;
+  right: 12rpx;
+}
+
+.ml-card-pill {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6rpx;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+}
+
+.ml-card-num {
+  font-size: 20rpx;
+  color: #fff;
+  font-weight: 500;
+}
+
+.ml-empty {
+  padding: 120rpx 48rpx;
+  text-align: center;
+}
+
+.ml-empty-text {
+  font-size: 28rpx;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+.ml-footer {
+  text-align: center;
+  font-size: 24rpx;
+  color: #9ca3af;
+  padding: 24rpx 0 8rpx;
+}

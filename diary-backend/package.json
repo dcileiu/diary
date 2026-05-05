@@ -1,0 +1,55 @@
+{
+  "name": "wallpaper-backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node ./node_modules/next/dist/bin/next dev",
+    "build": "prisma generate && node ./node_modules/next/dist/bin/next build",
+    "start": "node ./scripts/start-production.cjs",
+    "lint": "eslint",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:migrate-default-avatar": "npx tsx scripts/migrate-default-avatar.ts",
+    "postinstall": "prisma generate"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.3.0",
+    "@prisma/client": "^6.19.0",
+    "acorn": "^8.16.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.7.0",
+    "next": "16.2.1",
+    "prisma": "^6.19.0",
+    "proxy-agent": "^8.0.1",
+    "qiniu": "^7.15.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "shadcn": "^4.1.0",
+    "sharp": "^0.34.5",
+    "tailwind-merge": "^3.5.0",
+    "tw-animate-css": "^1.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.1",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5",
+    "vite-plus": "latest"
+  },
+  "overrides": {
+    "eslint-visitor-keys": "4.2.0",
+    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/gallery/gallery",
+    "pages/mine/mine",
+    "packagePreview/wallpaper-preview/wallpaper-preview",
+    "packageTools/search/search",
+    "packageTools/upload/upload",
+    "packageTools/mine-list/mine-list",
+    "packageTools/points-record/points-record",
+    "packageTools/contact-service/contact-service",
+    "packageTools/privacy-policy/privacy-policy",
+    "packageTools/usage-guide/usage-guide"
+  ],
+  "networkTimeout": {
+    "request": 60000,
+    "downloadFile": 60000,
+    "uploadFile": 60000,
+    "connectSocket": 60000
+  },
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "去水印壁纸",
+    "navigationBarBackgroundColor": "#F4FAF5",
+    "backgroundColor": "#F4FAF5",
+    "handleWebviewPreload": "auto"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#ffffff",
+    "selectedColor": "#4A9F5A",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/gallery/gallery",
+        "text": "壁纸图集"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "componentFramework": "glass-easel",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

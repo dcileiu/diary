@@ -1,0 +1,34 @@
+<view class="policy-root">
+  <view class="policy-nav" style="padding-top: {{statusBarHeight}}px;">
+    <view class="policy-nav-inner">
+      <view class="policy-back" bindtap="goBack">
+        <image
+          class="policy-back-icon"
+          src="https://wallpaper.cdn.itianci.cn/imgs/miniapp/bg-left.svg"
+          mode="aspectFit"
+        ></image>
+      </view>
+      <text class="policy-nav-title">隐私政策</text>
+      <view class="policy-nav-side"></view>
+    </view>
+  </view>
+
+  <view class="policy-main safe-bottom" style="padding-top: {{navBlockHeight}}px;">
+    <view class="policy-hero card">
+      <view class="policy-hero-title">请在使用服务前仔细阅读以下条款</view>
+      <view class="policy-hero-desc">
+        本页说明本程序的服务边界、使用规范、免责声明与联系我们的方式。继续使用服务即视为你已阅读并同意相关条款。
+      </view>
+    </view>
+
+    <view class="policy-board card">
+      <view wx:for="{{sections}}" wx:key="id" class="policy-section">
+        <view class="policy-title">{{item.title}}</view>
+        <view wx:for="{{item.paragraphs}}" wx:key="*this" class="policy-text">
+          {{item}}
+        </view>
+      </view>
+      <view class="policy-updated">{{updatedAt}}</view>
+    </view>
+  </view>
+</view>

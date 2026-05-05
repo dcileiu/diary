@@ -1,0 +1,2 @@
+ALTER TABLE `wx_user`
+    MODIFY `points` INTEGER NOT NULL DEFAULT 2;

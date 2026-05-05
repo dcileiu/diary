@@ -1,0 +1,170 @@
+<view class="page safe-bottom">
+  <view class="nav home-nav" style="padding-top: {{statusBarHeight}}px;">
+    <view class="nav-left">
+      <view class="nav-title">壁纸图集</view>
+      <view class="nav-icon-btn nav-search" bindtap="goSearch">
+        <text class="search-glyph">⌕</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="hero-skeleton" wx:if="{{indexLoading && swiperList.length === 0}}">
+    <view class="skeleton-block skeleton-hero"></view>
+    <view class="hero-caption hero-caption--skeleton">
+      <view class="skeleton-line skeleton-line--short"></view>
+    </view>
+  </view>
+
+  <view class="hero-wrap" wx:elif="{{swiperList.length}}">
+    <swiper
+      class="hero-swiper"
+      indicator-dots="{{swiperList.length > 1}}"
+      indicator-color="rgba(255,255,255,0.35)"
+      indicator-active-color="#ffffff"
+      autoplay="{{swiperList.length > 1}}"
+      circular
+      interval="4000"
+      bindchange="onHeroSwiperChange"
+    >
+      <swiper-item wx:for="{{swiperList}}" wx:key="wallpapersId">
+        <view class="hero-slide" bindtap="onHeroWallpaperTap" data-index="{{index}}">
+          <image
+            class="hero-img"
+            src="{{item.img}}"
+            mode="aspectFill"
+            lazy-load="{{true}}"
+            data-id="{{item.wallpapersId}}"
+            binderror="onHeroImgError"
+          />
+          <view class="hero-gradient"></view>
+        </view>
+      </swiper-item>
+    </swiper>
+    <view class="hero-caption">
+      <text class="hero-caption-text">每日精选</text>
+      <view class="hero-caption-line"></view>
+    </view>
+  </view>
+
+  <view class="section home-cat-flow">
+    <view class="home-tab-sentinel"></view>
+    <view
+      class="home-tab-shell {{tagSticky ? 'home-tab-shell--sticky' : ''}}"
+      style="top: 0;"
+    >
+      <scroll-view
+        scroll-x
+        class="home-tab-scroll {{tagSticky ? 'home-tab-scroll--sticky' : ''}}"
+        show-scrollbar="{{false}}"
+      >
+        <view class="home-tab-row">
+          <view
+            class="home-tab-cell {{activeTag === '' ? 'active' : ''}}"
+            data-kind="hot"
+            bindtap="onTagTap"
+          >
+            <text class="home-tab-label">推荐</text>
+            <view class="home-tab-underline" wx:if="{{activeTag === ''}}"></view>
+          </view>
+          <view
+            wx:for="{{tags}}"
+            wx:key="id"
+            class="home-tab-cell {{activeTag === item.tag ? 'active' : ''}}"
+            data-kind="tag"
+            data-tag="{{item.tag}}"
+            bindtap="onTagTap"
+          >
+            <text class="home-tab-label">{{item.label}}</text>
+            <view class="home-tab-underline" wx:if="{{activeTag === item.tag}}"></view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="section-head">
+      <text class="section-more">点击图片可放大全屏预览，点击标签筛选，下滑查看更多</text>
+    </view>
+
+    <view class="hot-skeleton-grid" wx:if="{{hotLoading && leftCol.length === 0 && rightCol.length === 0}}">
+      <view class="hot-col">
+        <view class="hot-card-skel card" wx:for="{{[1,2,3]}}" wx:key="*this">
+          <view class="skeleton-block skeleton-card-img"></view>
+          <view class="skeleton-pill"></view>
+        </view>
+      </view>
+      <view class="hot-col">
+        <view class="hot-card-skel card" wx:for="{{[1,2,3]}}" wx:key="*this">
+          <view class="skeleton-block skeleton-card-img skeleton-card-img--tall"></view>
+          <view class="skeleton-pill"></view>
+        </view>
+      </view>
+    </view>
+
+    <view class="hot-grid" wx:else>
+      <view class="hot-col">
+        <view
+          wx:for="{{leftCol}}"
+          wx:key="wallpapersId"
+          class="hot-card card"
+          bindtap="onHotWallpaperTap"
+          data-id="{{item.wallpapersId}}"
+        >
+          <image
+            class="hot-img"
+            src="{{item.img}}"
+            mode="widthFix"
+            lazy-load="{{true}}"
+            data-id="{{item.wallpapersId}}"
+            binderror="onHotImgError"
+          />
+          <view class="hot-meta" catchtap="onHotCollectTap" data-id="{{item.wallpapersId}}">
+            <view class="hot-pill">
+              <view class="heart-like {{item.favorited ? 'heart-like--on' : ''}} {{item._heartJustLiked ? 'heart-like--pop' : ''}}">
+                <view class="heart-like-inner">
+                  <image class="heart-like-img heart-like-outline" src="/images/heart-like-outline.svg" mode="aspectFit" />
+                  <image class="heart-like-img heart-like-filled" src="/images/heart-like-filled.svg" mode="aspectFit" />
+                  <view class="heart-like-celebrate" wx:if="{{item._heartJustLiked}}"></view>
+                </view>
+              </view>
+              <text class="hot-num">{{item.hotLabel}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="hot-col">
+        <view
+          wx:for="{{rightCol}}"
+          wx:key="wallpapersId"
+          class="hot-card card"
+          bindtap="onHotWallpaperTap"
+          data-id="{{item.wallpapersId}}"
+        >
+          <image
+            class="hot-img"
+            src="{{item.img}}"
+            mode="widthFix"
+            lazy-load="{{true}}"
+            data-id="{{item.wallpapersId}}"
+            binderror="onHotImgError"
+          />
+          <view class="hot-meta" catchtap="onHotCollectTap" data-id="{{item.wallpapersId}}">
+            <view class="hot-pill">
+              <view class="heart-like {{item.favorited ? 'heart-like--on' : ''}} {{item._heartJustLiked ? 'heart-like--pop' : ''}}">
+                <view class="heart-like-inner">
+                  <image class="heart-like-img heart-like-outline" src="/images/heart-like-outline.svg" mode="aspectFit" />
+                  <image class="heart-like-img heart-like-filled" src="/images/heart-like-filled.svg" mode="aspectFit" />
+                  <view class="heart-like-celebrate" wx:if="{{item._heartJustLiked}}"></view>
+                </view>
+              </view>
+              <text class="hot-num">{{item.hotLabel}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="hot-footer-hint" wx:if="{{loading}}">加载中...</view>
+    <view class="hot-footer-hint" wx:elif="{{noMore && allRecords.length}}">没有更多了</view>
+  </view>
+</view>
