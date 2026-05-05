@@ -92,7 +92,7 @@ App({
   },
 
   globalData: {
-    apiBase: 'http://127.0.0.1:3000',
+    apiBase: 'http://127.0.0.1:4010',
     user: null,
     pendingEntriesFilter: '',
     bootstrapCache: null,
