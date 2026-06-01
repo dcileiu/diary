@@ -17,7 +17,6 @@ export function missingCriticalConfigKeys(): string[] {
     "DATABASE_URL",
     "ADMIN_USERNAME",
     "ADMIN_PASSWORD",
-    "ADMIN_ACCESS_TOKEN",
     "WECHAT_MINI_PROGRAM_APP_ID",
     "WECHAT_MINI_PROGRAM_SECRET",
   ];

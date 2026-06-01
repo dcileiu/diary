@@ -1,26 +1,20 @@
 import { adminJson } from "@/lib/admin-api-response";
-import { ensureAdmin } from "@/lib/admin-guard";
+import { withAdmin } from "@/lib/admin-route";
 import { prisma } from "@/lib/prisma";
+import { readNumericId } from "@/lib/route-helpers";
+import { asText, clampInt } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-function readId(req: Request) {
-  const url = new URL(req.url);
-  const parts = url.pathname.split("/").filter(Boolean);
-  return Number(parts.at(-1));
-}
-
-export async function PATCH(req: Request) {
-  const denied = ensureAdmin(req);
-  if (denied) return denied;
-  const id = readId(req);
-  if (!Number.isInteger(id) || id <= 0) {
+export const PATCH = withAdmin("admin/categories/[id]", async (req) => {
+  const id = readNumericId(req);
+  if (!id) {
     return adminJson({ code: 400, message: "分类 ID 无效" }, { status: 400 });
   }
 
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-  const name = String(body.name ?? "").trim();
+  const name = asText(body.name);
   if (!name) {
     return adminJson({ code: 400, message: "分类名称不能为空" }, { status: 400 });
   }
@@ -29,19 +23,17 @@ export async function PATCH(req: Request) {
     where: { id },
     data: {
       name,
-      description: String(body.description ?? "").trim(),
-      color: String(body.color ?? "").trim() || "#E85D75",
-      sortOrder: Number(body.sortOrder) || 0,
+      description: asText(body.description),
+      color: asText(body.color) || "#E85D75",
+      sortOrder: clampInt(body.sortOrder, 0, 9999, 0),
     },
   });
   return adminJson({ code: 0, data: updated });
-}
+});
 
-export async function DELETE(req: Request) {
-  const denied = ensureAdmin(req);
-  if (denied) return denied;
-  const id = readId(req);
-  if (!Number.isInteger(id) || id <= 0) {
+export const DELETE = withAdmin("admin/categories/[id]", async (req) => {
+  const id = readNumericId(req);
+  if (!id) {
     return adminJson({ code: 400, message: "分类 ID 无效" }, { status: 400 });
   }
 
@@ -55,4 +47,4 @@ export async function DELETE(req: Request) {
 
   await prisma.diaryCategory.delete({ where: { id } });
   return adminJson({ code: 0, data: true });
-}
+});

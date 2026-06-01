@@ -1,35 +1,29 @@
-import { DiaryEntryStatus, type Prisma } from "@prisma/client";
+import { type Prisma } from "@prisma/client";
 
 import { adminJson } from "@/lib/admin-api-response";
-import { ensureAdmin } from "@/lib/admin-guard";
+import { withAdmin } from "@/lib/admin-route";
 import { DIARY_STATUS_LABEL_MAP } from "@/lib/diary-constants";
+import { normalizeStatusOrNull } from "@/lib/diary-status";
 import { prisma } from "@/lib/prisma";
+import { asText, parsePagination, positiveInt } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-function normalizeStatus(value: string | null) {
-  const raw = String(value ?? "").trim().toUpperCase();
-  const allowed = Object.values(DiaryEntryStatus);
-  return allowed.includes(raw as DiaryEntryStatus)
-    ? (raw as DiaryEntryStatus)
-    : null;
-}
-
-export async function GET(req: Request) {
-  const denied = ensureAdmin(req);
-  if (denied) return denied;
-
+export const GET = withAdmin("admin/entries", async (req) => {
   const url = new URL(req.url);
-  const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
-  const limit = Math.max(1, Math.min(50, Number(url.searchParams.get("limit")) || 12));
-  const status = normalizeStatus(url.searchParams.get("status"));
-  const categoryId = Number(url.searchParams.get("categoryId") || 0) || 0;
-  const keyword = String(url.searchParams.get("keyword") || "").trim();
+  const { page, pageSize: limit, skip, take } = parsePagination(
+    url.searchParams.get("page"),
+    url.searchParams.get("limit"),
+    { defaultPageSize: 12, maxPageSize: 50 },
+  );
+  const status = normalizeStatusOrNull(url.searchParams.get("status"));
+  const categoryId = positiveInt(url.searchParams.get("categoryId"));
+  const keyword = asText(url.searchParams.get("keyword"));
 
   const where: Prisma.DiaryEntryWhereInput = {
     ...(status ? { status } : {}),
-    ...(categoryId > 0 ? { categoryId } : {}),
+    ...(categoryId ? { categoryId } : {}),
     ...(keyword
       ? {
           OR: [
@@ -47,18 +41,13 @@ export async function GET(req: Request) {
     prisma.diaryEntry.findMany({
       where,
       include: {
-        user: {
-          select: { id: true, nickname: true },
-        },
+        user: { select: { id: true, nickname: true } },
         category: true,
-        tags: {
-          include: { tag: true },
-          orderBy: { createdAt: "asc" },
-        },
+        tags: { include: { tag: true }, orderBy: { createdAt: "asc" } },
       },
       orderBy: [{ isPinned: "desc" }, { happenedAt: "desc" }, { id: "desc" }],
-      skip: (page - 1) * limit,
-      take: limit,
+      skip,
+      take,
     }),
   ]);
 
@@ -98,4 +87,4 @@ export async function GET(req: Request) {
       })),
     },
   });
-}
+});

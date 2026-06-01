@@ -12,8 +12,23 @@ import {
   DIARY_STATUS_LABEL_MAP,
   DIARY_ENTRY_STATUS_OPTIONS,
 } from "@/lib/diary-constants";
+import {
+  isResolvedStatus,
+  normalizeFollowUpType,
+  normalizeStatus,
+  normalizeStatusOrNull,
+} from "@/lib/diary-status";
 import { absoluteAssetUrl } from "@/lib/public-origin";
 import { prisma } from "@/lib/prisma";
+import {
+  asText,
+  clampInt,
+  clampLevel,
+  normalizeIdList,
+  parseDateInput,
+  parsePagination,
+  positiveInt,
+} from "@/lib/validation";
 import {
   defaultMiniProgramNickname,
   MINI_PROGRAM_DEFAULT_AVATAR_PATH,
@@ -57,78 +72,6 @@ export class DiaryInputError extends Error {
 
 export class DiaryNotFoundError extends Error {
   override name = "DiaryNotFoundError";
-}
-
-function asText(value: unknown): string {
-  return String(value ?? "").trim();
-}
-
-function clampLevel(value: unknown, fallback = 3) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return fallback;
-  return Math.max(1, Math.min(5, Math.round(n)));
-}
-
-function positiveInt(value: unknown): number | null {
-  const n = Number(value);
-  if (!Number.isInteger(n) || n <= 0) return null;
-  return n;
-}
-
-function parseDateInput(value: unknown): Date | null {
-  const raw = asText(value);
-  if (!raw) return null;
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) return null;
-  return parsed;
-}
-
-function normalizeStatus(value: unknown): DiaryEntryStatus {
-  const raw = asText(value).toUpperCase();
-  const allowed = Object.values(DiaryEntryStatus);
-  return allowed.includes(raw as DiaryEntryStatus)
-    ? (raw as DiaryEntryStatus)
-    : DiaryEntryStatus.OPEN;
-}
-
-function normalizeOptionalStatus(value: unknown): DiaryEntryStatus | null {
-  const raw = asText(value).toUpperCase();
-  if (!raw || raw === "ALL") return null;
-  const allowed = Object.values(DiaryEntryStatus);
-  return allowed.includes(raw as DiaryEntryStatus)
-    ? (raw as DiaryEntryStatus)
-    : null;
-}
-
-function normalizeFollowUpType(value: unknown): DiaryFollowUpType {
-  const raw = asText(value).toUpperCase();
-  const allowed = Object.values(DiaryFollowUpType);
-  return allowed.includes(raw as DiaryFollowUpType)
-    ? (raw as DiaryFollowUpType)
-    : DiaryFollowUpType.NOTE;
-}
-
-function normalizeIdList(value: unknown): number[] {
-  const raw = Array.isArray(value)
-    ? value
-    : typeof value === "string"
-      ? value.split(",")
-      : [];
-  return Array.from(
-    new Set(
-      raw
-        .map((item) => positiveInt(item))
-        .filter((item): item is number => item != null),
-    ),
-  );
-}
-
-function isResolvedStatus(status: DiaryEntryStatus) {
-  return (
-    status === DiaryEntryStatus.RECONCILED ||
-    status === DiaryEntryStatus.RELEASED ||
-    status === DiaryEntryStatus.ARCHIVED
-  );
 }
 
 function previewContent(content: string) {
@@ -570,9 +513,12 @@ export async function listDiaryEntriesForUser(
     keyword?: unknown;
   },
 ) {
-  const page = Math.max(1, positiveInt(input.page) ?? 1);
-  const pageSize = Math.max(1, Math.min(30, positiveInt(input.pageSize) ?? 10));
-  const status = normalizeOptionalStatus(input.status);
+  const { page, pageSize, skip, take } = parsePagination(
+    input.page,
+    input.pageSize,
+    { defaultPageSize: 10, maxPageSize: 30 },
+  );
+  const status = normalizeStatusOrNull(input.status);
   const statusGroup = asText(input.statusGroup).toUpperCase();
   const categoryId = positiveInt(input.categoryId);
   const keyword = asText(input.keyword);
@@ -614,8 +560,8 @@ export async function listDiaryEntriesForUser(
       where,
       include: listInclude,
       orderBy: [{ isPinned: "desc" }, { happenedAt: "desc" }, { id: "desc" }],
-      skip: (page - 1) * pageSize,
-      take: pageSize,
+      skip,
+      take,
     }),
   ]);
 
@@ -662,7 +608,8 @@ export async function saveDiaryEntryForUser(
   if (!content) throw new DiaryInputError("内容不能为空");
 
   const categoryId = positiveInt(input.categoryId);
-  const happenedAt = parseDateInput(input.happenedAt) ?? new Date();
+  // 只有显式传入合法日期时才更新发生时间；编辑时若未传，保持原值而不是重置为当前时间。
+  const parsedHappenedAt = parseDateInput(input.happenedAt);
   const grievanceLevel = clampLevel(input.grievanceLevel);
   const emotionLevel = clampLevel(input.emotionLevel);
   const status = normalizeStatus(input.status);
@@ -699,7 +646,6 @@ export async function saveDiaryEntryForUser(
       emotionLevel,
       status,
       isPinned: Boolean(input.isPinned),
-      happenedAt,
       settledAt: isResolvedStatus(status) ? new Date() : null,
     };
 
@@ -714,6 +660,7 @@ export async function saveDiaryEntryForUser(
         where: { id: entryId },
         data: {
           ...baseData,
+          ...(parsedHappenedAt ? { happenedAt: parsedHappenedAt } : {}),
           followUpCount: current.followUpCount,
           lastFollowUpAt: current.lastFollowUpAt,
         },
@@ -721,7 +668,9 @@ export async function saveDiaryEntryForUser(
       savedId = entryId;
       await tx.diaryEntryTag.deleteMany({ where: { entryId } });
     } else {
-      const created = await tx.diaryEntry.create({ data: baseData });
+      const created = await tx.diaryEntry.create({
+        data: { ...baseData, happenedAt: parsedHappenedAt ?? new Date() },
+      });
       savedId = created.id;
     }
 
@@ -812,7 +761,7 @@ export async function addDiaryFollowUpForUser(
   const content = asText(input.content);
   if (!content) throw new DiaryInputError("跟进内容不能为空");
   const type = normalizeFollowUpType(input.type);
-  const delta = Math.max(-2, Math.min(2, Math.round(Number(input.emotionDelta) || 0)));
+  const delta = clampInt(input.emotionDelta, -2, 2, 0);
 
   return prisma.$transaction(async (tx) => {
     const current = await tx.diaryEntry.findFirst({

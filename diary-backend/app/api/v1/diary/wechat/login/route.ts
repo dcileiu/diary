@@ -1,5 +1,7 @@
 import { mpErr, mpErrorMessage, mpOk, mpServerError } from "@/lib/mp-api";
 import { loginOrRegisterDiaryUser } from "@/lib/diary-service";
+import { logError } from "@/lib/logger";
+import { checkRateLimit, clientIpFromRequest } from "@/lib/rate-limit";
 import {
   resolveMiniProgramOpenId,
   WeChatJsCodeError,
@@ -7,6 +9,12 @@ import {
 
 export async function POST(req: Request) {
   try {
+    const ip = clientIpFromRequest(req);
+    const limited = checkRateLimit(`wechat-login:${ip}`, 30, 60_000);
+    if (!limited.allowed) {
+      return mpErr(429, "登录请求过于频繁，请稍后再试");
+    }
+
     const body = (await req.json().catch(() => ({}))) as {
       code?: string;
     };
@@ -21,7 +29,7 @@ export async function POST(req: Request) {
       if (error instanceof WeChatJsCodeError) {
         return mpErr(400, error.message);
       }
-      console.error("[diary/wechat/login] openid", error);
+      logError("diary/wechat/login:openid", error);
       return mpServerError(
         process.env.NODE_ENV === "development"
           ? `换取 openid 失败: ${mpErrorMessage(error)}`
@@ -29,7 +37,7 @@ export async function POST(req: Request) {
       );
     }
   } catch (error) {
-    console.error("[diary/wechat/login]", error);
+    logError("diary/wechat/login", error);
     return mpServerError(
       process.env.NODE_ENV === "development"
         ? `登录失败: ${mpErrorMessage(error)}`

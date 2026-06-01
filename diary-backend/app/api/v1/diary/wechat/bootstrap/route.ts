@@ -1,27 +1,19 @@
-import { mpOk, mpServerError, mpUnauthorized } from "@/lib/mp-api";
-import {
-  getDiaryBootstrap,
-  listDiaryMeta,
-  resolveDiaryUserFromRequest,
-} from "@/lib/diary-service";
+import { getDiaryBootstrap, listDiaryMeta } from "@/lib/diary-service";
+import { mpOk } from "@/lib/mp-api";
+import { withDiaryUser } from "@/lib/mp-route";
 
-export async function POST(req: Request) {
-  try {
-    const user = await resolveDiaryUserFromRequest(req);
-    if (!user) return mpUnauthorized();
-
+export const POST = withDiaryUser(
+  "diary/wechat/bootstrap",
+  "加载首页数据失败",
+  async (_req, user) => {
     const [bootstrap, meta] = await Promise.all([
       getDiaryBootstrap(user.id),
       listDiaryMeta(),
     ]);
-
     return mpOk({
       ...bootstrap,
       categories: meta.categories,
       statusOptions: meta.statusOptions,
     });
-  } catch (error) {
-    console.error("[diary/wechat/bootstrap]", error);
-    return mpServerError("加载首页数据失败");
-  }
-}
+  },
+);

@@ -1,17 +1,12 @@
-import { mpOk, mpServerError, mpUnauthorized } from "@/lib/mp-api";
-import {
-  getDiaryCalendar,
-  resolveDiaryUserFromRequest,
-} from "@/lib/diary-service";
+import { getDiaryCalendar } from "@/lib/diary-service";
+import { mpOk } from "@/lib/mp-api";
+import { readJsonBody, withDiaryUser } from "@/lib/mp-route";
 
-export async function POST(req: Request) {
-  try {
-    const user = await resolveDiaryUserFromRequest(req);
-    if (!user) return mpUnauthorized();
-    const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
+export const POST = withDiaryUser(
+  "diary/wechat/calendar",
+  "加载日历数据失败",
+  async (req, user) => {
+    const body = await readJsonBody(req);
     return mpOk(await getDiaryCalendar(user.id, body));
-  } catch (error) {
-    console.error("[diary/wechat/calendar]", error);
-    return mpServerError("加载日历数据失败");
-  }
-}
+  },
+);

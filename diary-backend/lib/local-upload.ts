@@ -29,8 +29,9 @@ export function getUploadStorageRoot(): string {
 
 type UploadSubdir = "entries" | "avatars" | "system" | "user_uploads";
 
+// 故意不接受 svg：SVG 可内嵌 <script>，作为可被浏览器内联渲染的存储型 XSS 载体。
 const IMAGE_FILENAME_EXT =
-  /\.(jpe?g|png|gif|webp|bmp|svg|heic|heif|avif|ico|jfif)$/i;
+  /\.(jpe?g|png|gif|webp|bmp|heic|heif|avif|ico|jfif)$/i;
 
 export class UploadNotImageError extends Error {
   override readonly name = "UploadNotImageError";
@@ -55,6 +56,8 @@ export class UploadTooLargeError extends Error {
 
 export function isAllowedImageUpload(blob: Blob, nameHint?: string): boolean {
   const mime = (blob.type || "").trim().toLowerCase();
+  // 显式拒绝 SVG：即便声明为 image/svg+xml 也可能携带脚本。
+  if (mime.includes("svg")) return false;
   if (mime.startsWith("image/")) return true;
 
   if (!mime || mime === "application/octet-stream") {
@@ -73,7 +76,6 @@ const SAFE_EXT_FROM_FILENAME = new Set([
   "png",
   "webp",
   "gif",
-  "svg",
   "bmp",
   "avif",
   "heic",
@@ -97,7 +99,6 @@ function extFrom(blob: Blob, nameHint?: string): string {
   if (mime.includes("jpeg") || mime.includes("jpg")) return "jpg";
   if (mime.includes("webp")) return "webp";
   if (mime.includes("gif")) return "gif";
-  if (mime.includes("svg")) return "svg";
   if (mime.includes("bmp")) return "bmp";
   if (mime.includes("heic")) return "heic";
   if (mime.includes("heif")) return "heif";

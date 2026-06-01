@@ -1,21 +1,15 @@
 import { adminJson } from "@/lib/admin-api-response";
-import { ensureAdmin } from "@/lib/admin-guard";
+import { withAdmin } from "@/lib/admin-route";
 import { prisma } from "@/lib/prisma";
+import { asText, clampInt } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET(req: Request) {
-  const denied = ensureAdmin(req);
-  if (denied) return denied;
-
+export const GET = withAdmin("admin/tags", async () => {
   const list = await prisma.diaryTag.findMany({
     orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
-    include: {
-      _count: {
-        select: { entryTags: true },
-      },
-    },
+    include: { _count: { select: { entryTags: true } } },
   });
 
   return adminJson({
@@ -30,14 +24,11 @@ export async function GET(req: Request) {
       })),
     },
   });
-}
+});
 
-export async function POST(req: Request) {
-  const denied = ensureAdmin(req);
-  if (denied) return denied;
-
+export const POST = withAdmin("admin/tags", async (req) => {
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-  const name = String(body.name ?? "").trim();
+  const name = asText(body.name);
   if (!name) {
     return adminJson({ code: 400, message: "标签名称不能为空" }, { status: 400 });
   }
@@ -45,10 +36,10 @@ export async function POST(req: Request) {
   const created = await prisma.diaryTag.create({
     data: {
       name,
-      color: String(body.color ?? "").trim() || "#577590",
-      sortOrder: Number(body.sortOrder) || 0,
+      color: asText(body.color) || "#577590",
+      sortOrder: clampInt(body.sortOrder, 0, 9999, 0),
     },
   });
 
   return adminJson({ code: 0, data: created });
-}
+});

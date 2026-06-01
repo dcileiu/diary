@@ -1,39 +1,16 @@
-import { DiaryEntryStatus } from "@prisma/client";
-
 import { adminJson } from "@/lib/admin-api-response";
-import { ensureAdmin } from "@/lib/admin-guard";
+import { withAdmin } from "@/lib/admin-route";
+import { isResolvedStatus, normalizeStatusOrNull } from "@/lib/diary-status";
 import { prisma } from "@/lib/prisma";
+import { readNumericId } from "@/lib/route-helpers";
+import { positiveInt } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-function readId(req: Request) {
-  const url = new URL(req.url);
-  const parts = url.pathname.split("/").filter(Boolean);
-  return Number(parts.at(-1));
-}
-
-function normalizeStatus(value: unknown) {
-  const raw = String(value ?? "").trim().toUpperCase();
-  const allowed = Object.values(DiaryEntryStatus);
-  return allowed.includes(raw as DiaryEntryStatus)
-    ? (raw as DiaryEntryStatus)
-    : null;
-}
-
-function isResolvedStatus(status: DiaryEntryStatus | null) {
-  return (
-    status === DiaryEntryStatus.RECONCILED ||
-    status === DiaryEntryStatus.RELEASED ||
-    status === DiaryEntryStatus.ARCHIVED
-  );
-}
-
-export async function PATCH(req: Request) {
-  const denied = ensureAdmin(req);
-  if (denied) return denied;
-  const id = readId(req);
-  if (!Number.isInteger(id) || id <= 0) {
+export const PATCH = withAdmin("admin/entries/[id]", async (req) => {
+  const id = readNumericId(req);
+  if (!id) {
     return adminJson({ code: 400, message: "条目 ID 无效" }, { status: 400 });
   }
 
@@ -41,7 +18,7 @@ export async function PATCH(req: Request) {
   const patch: Record<string, unknown> = {};
 
   if (body.status != null) {
-    const status = normalizeStatus(body.status);
+    const status = normalizeStatusOrNull(body.status);
     if (!status) {
       return adminJson({ code: 400, message: "状态无效" }, { status: 400 });
     }
@@ -50,13 +27,9 @@ export async function PATCH(req: Request) {
   }
   if (body.isPinned != null) patch.isPinned = Boolean(body.isPinned);
   if (body.categoryId !== undefined) {
-    const categoryId = Number(body.categoryId) || 0;
-    patch.categoryId = categoryId > 0 ? categoryId : null;
+    patch.categoryId = positiveInt(body.categoryId);
   }
 
-  const updated = await prisma.diaryEntry.update({
-    where: { id },
-    data: patch,
-  });
+  const updated = await prisma.diaryEntry.update({ where: { id }, data: patch });
   return adminJson({ code: 0, data: updated });
-}
+});

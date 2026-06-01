@@ -1,16 +1,12 @@
-import { DiaryEntryStatus } from "@prisma/client";
-
 import { adminJson } from "@/lib/admin-api-response";
-import { ensureAdmin } from "@/lib/admin-guard";
+import { withAdmin } from "@/lib/admin-route";
+import { RESOLVED_STATUSES, UNRESOLVED_STATUSES } from "@/lib/diary-status";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET(req: Request) {
-  const denied = ensureAdmin(req);
-  if (denied) return denied;
-
+export const GET = withAdmin("admin/stats", async () => {
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
@@ -27,27 +23,15 @@ export async function GET(req: Request) {
     prisma.wxUser.count(),
     prisma.diaryEntry.count(),
     prisma.diaryEntry.count({
-      where: {
-        status: { in: [DiaryEntryStatus.OPEN, DiaryEntryStatus.COOLING] },
-      },
+      where: { status: { in: [...UNRESOLVED_STATUSES] } },
     }),
     prisma.diaryEntry.count({
-      where: {
-        status: {
-          in: [
-            DiaryEntryStatus.RECONCILED,
-            DiaryEntryStatus.RELEASED,
-            DiaryEntryStatus.ARCHIVED,
-          ],
-        },
-      },
+      where: { status: { in: [...RESOLVED_STATUSES] } },
     }),
     prisma.diaryEntryFollowUp.count(),
     prisma.diaryCategory.count(),
     prisma.diaryTag.count(),
-    prisma.diaryEntry.count({
-      where: { createdAt: { gte: todayStart } },
-    }),
+    prisma.diaryEntry.count({ where: { createdAt: { gte: todayStart } } }),
   ]);
 
   return adminJson({
@@ -63,4 +47,4 @@ export async function GET(req: Request) {
       todayEntryCount,
     },
   });
-}
+});

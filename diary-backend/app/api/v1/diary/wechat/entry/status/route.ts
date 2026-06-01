@@ -1,29 +1,16 @@
-import { mpErr, mpOk, mpServerError, mpUnauthorized } from "@/lib/mp-api";
-import {
-  DiaryNotFoundError,
-  resolveDiaryUserFromRequest,
-  updateDiaryEntryStatusForUser,
-} from "@/lib/diary-service";
+import { updateDiaryEntryStatusForUser } from "@/lib/diary-service";
+import { mpErr, mpOk } from "@/lib/mp-api";
+import { readJsonBody, withDiaryUser } from "@/lib/mp-route";
+import { positiveInt } from "@/lib/validation";
 
-export async function POST(req: Request) {
-  try {
-    const user = await resolveDiaryUserFromRequest(req);
-    if (!user) return mpUnauthorized();
-    const body = (await req.json().catch(() => ({}))) as {
-      entryId?: unknown;
-      status?: unknown;
-    };
-    const entryId = Number(body.entryId);
-    if (!Number.isInteger(entryId) || entryId <= 0) {
-      return mpErr(400, "缺少条目 ID");
-    }
+export const POST = withDiaryUser(
+  "diary/wechat/entry/status",
+  "更新状态失败",
+  async (req, user) => {
+    const body = await readJsonBody(req);
+    const entryId = positiveInt(body.entryId);
+    if (!entryId) return mpErr(400, "缺少条目 ID");
     const entry = await updateDiaryEntryStatusForUser(user.id, entryId, body.status);
     return mpOk({ entry });
-  } catch (error) {
-    if (error instanceof DiaryNotFoundError) {
-      return mpErr(404, error.message);
-    }
-    console.error("[diary/wechat/entry/status]", error);
-    return mpServerError("更新状态失败");
-  }
-}
+  },
+);

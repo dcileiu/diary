@@ -48,6 +48,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { adminApiFetch } from "@/lib/admin-client-fetch";
 import { ADMIN_TOKEN_STORAGE_KEY } from "@/lib/admin-token";
 import { cn } from "@/lib/utils";
 
@@ -109,7 +110,19 @@ function MobileSidebarAutoClose({ pathname }: { pathname: string }) {
   return null;
 }
 
-function adminLogout(router: ReturnType<typeof useRouter>) {
+async function adminLogout(router: ReturnType<typeof useRouter>) {
+  const token = localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY);
+  // 先请求服务端吊销会话（best-effort），再清本地令牌并跳转登录页。
+  if (token) {
+    try {
+      await adminApiFetch("/api/admin/logout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch {
+      // 网络异常也要继续本地登出，避免卡在后台。
+    }
+  }
   localStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
   router.push("/admin/login");
   router.refresh();
