@@ -3,7 +3,7 @@ const path = require("path");
 module.exports = {
   apps: [
     {
-      name: "grudge-diary-backend",
+      name: "diary-backend",
       cwd: __dirname,
       script: path.join(__dirname, "scripts", "start-production.cjs"),
       args: "start -H 0.0.0.0",
