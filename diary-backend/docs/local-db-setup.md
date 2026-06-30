@@ -1,34 +1,23 @@
 # 本地数据库初始化
 
-当前代码已经完成日记系统改造，但 `diary-backend/.env` 里的 MySQL 账号无法通过认证，所以数据库迁移和种子数据还没有实际落库。
+后端使用 **SQLite**，无需单独安装数据库服务，数据库就是一个文件。
 
-## 1. 创建本地数据库
+## 1. 配置 `.env`
 
-可以先在本机 MySQL 执行下面这段 SQL：
+复制示例并确认 `DATABASE_URL`：
 
-```sql
-CREATE DATABASE IF NOT EXISTS grudge_diary
-  DEFAULT CHARACTER SET utf8mb4
-  DEFAULT COLLATE utf8mb4_unicode_ci;
-
-CREATE USER IF NOT EXISTS 'diary_user'@'127.0.0.1'
-  IDENTIFIED BY 'change_me_123';
-
-GRANT ALL PRIVILEGES ON grudge_diary.* TO 'diary_user'@'127.0.0.1';
-FLUSH PRIVILEGES;
+```bash
+cp .env.example .env
 ```
-
-## 2. 更新 `.env`
-
-把 `diary-backend/.env` 里的 `DATABASE_URL` 改成：
 
 ```env
-DATABASE_URL="mysql://diary_user:change_me_123@127.0.0.1:3306/grudge_diary?charset=utf8mb4"
+# 路径相对于 prisma/schema.prisma 所在目录，实际指向 diary-backend/db/dev.db
+DATABASE_URL="file:../db/dev.db"
 ```
 
-如果你想继续沿用现有数据库名，也可以只改账号密码，只要这条连接串能成功连上本机 MySQL 即可。
+无需创建数据库或账号——首次执行迁移时会在 `db/` 目录自动生成数据库文件。
 
-## 3. 落库和种子数据
+## 2. 落库和种子数据
 
 在 `diary-backend` 目录执行：
 
@@ -37,7 +26,7 @@ npm run db:deploy
 npm run db:seed
 ```
 
-## 4. 启动后端
+## 3. 启动后端
 
 开发模式：
 

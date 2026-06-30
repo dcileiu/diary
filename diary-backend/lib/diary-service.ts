@@ -1,9 +1,4 @@
-import {
-  DiaryEntryStatus,
-  DiaryFollowUpType,
-  Prisma,
-  type WxUser,
-} from "@prisma/client";
+import { Prisma, type WxUser } from "@prisma/client";
 import { randomUUID } from "crypto";
 
 import {
@@ -13,6 +8,8 @@ import {
   DIARY_ENTRY_STATUS_OPTIONS,
 } from "@/lib/diary-constants";
 import {
+  DiaryEntryStatus,
+  DiaryFollowUpType,
   isResolvedStatus,
   normalizeFollowUpType,
   normalizeStatus,
@@ -354,7 +351,7 @@ export async function getDiaryCalendar(
       unresolved: boolean;
     }
   > = {};
-  const unresolvedStatuses = new Set<DiaryEntryStatus>([
+  const unresolvedStatuses = new Set<string>([
     DiaryEntryStatus.OPEN,
     DiaryEntryStatus.COOLING,
   ]);
@@ -675,12 +672,14 @@ export async function saveDiaryEntryForUser(
     }
 
     if (validTagIds.length) {
+      // 注意：SQLite 下 Prisma createMany 不支持 skipDuplicates。
+      // 这里 validTagIds 已去重，且新建无既有标签、编辑前已 deleteMany 清空，
+      // 配合 @@unique([entryId, tagId]) 不会产生重复，无需该选项。
       await tx.diaryEntryTag.createMany({
         data: validTagIds.map((tagId) => ({
           entryId: savedId,
           tagId,
         })),
-        skipDuplicates: true,
       });
     }
 

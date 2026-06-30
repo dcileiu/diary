@@ -6,7 +6,7 @@
 
 - 小程序端：记录、筛选、回看自己的记仇事件
 - 管理后台：查看用户、条目、分类标签和整体数据
-- 后端：基于 Next.js Route Handlers + Prisma + MySQL
+- 后端：基于 Next.js Route Handlers + Prisma + SQLite
 
 ## MVP 功能范围
 

@@ -3,18 +3,21 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+// 说明：SQLite 不支持 Prisma enum 与原生类型（@db.VarChar/@db.Text），
+// 因此 status / type 用 String 存储，取值约束由 lib/diary-status.ts 统一兜底。
 
 /// 后台管理会话：登录时签发不透明随机令牌，库里只存其 SHA-256（泄库也拿不到原始令牌）。
 /// 支持过期（expiresAt）与吊销（删除记录），取代此前静态、不可吊销的环境变量令牌。
 model AdminSession {
   id         Int      @id @default(autoincrement())
-  tokenHash  String   @unique @map("token_hash") @db.VarChar(64)
-  username   String   @default("") @db.VarChar(64)
-  ip         String   @default("") @db.VarChar(64)
-  userAgent  String   @default("") @map("user_agent") @db.VarChar(255)
+  tokenHash  String   @unique @map("token_hash")
+  username   String   @default("")
+  ip         String   @default("")
+  userAgent  String   @default("") @map("user_agent")
   createdAt  DateTime @default(now()) @map("created_at")
   expiresAt  DateTime @map("expires_at")
   lastSeenAt DateTime @default(now()) @map("last_seen_at")
@@ -23,28 +26,13 @@ model AdminSession {
   @@map("admin_session")
 }
 
-enum DiaryEntryStatus {
-  OPEN
-  COOLING
-  RECONCILED
-  RELEASED
-  ARCHIVED
-}
-
-enum DiaryFollowUpType {
-  NOTE
-  REFLECTION
-  ACTION
-  RESULT
-}
-
 model WxUser {
   id                 Int                    @id @default(autoincrement())
-  openId             String                 @unique @map("open_id") @db.VarChar(64)
-  accessToken        String                 @unique @map("access_token") @db.VarChar(128)
-  nickname           String                 @default("记仇用户") @db.VarChar(64)
-  avatar             String                 @default("") @db.VarChar(512)
-  bio                String                 @default("") @db.VarChar(255)
+  openId             String                 @unique @map("open_id")
+  accessToken        String                 @unique @map("access_token")
+  nickname           String                 @default("记仇用户")
+  avatar             String                 @default("")
+  bio                String                 @default("")
   totalEntryCount    Int                    @default(0) @map("total_entry_count")
   activeEntryCount   Int                    @default(0) @map("active_entry_count")
   resolvedEntryCount Int                    @default(0) @map("resolved_entry_count")
@@ -62,9 +50,9 @@ model WxUser {
 
 model DiaryCategory {
   id          Int          @id @default(autoincrement())
-  name        String       @unique @db.VarChar(64)
-  description String       @default("") @db.VarChar(255)
-  color       String       @default("#E85D75") @db.VarChar(16)
+  name        String       @unique
+  description String       @default("")
+  color       String       @default("#E85D75")
   sortOrder   Int          @default(0) @map("sort_order")
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
@@ -76,8 +64,8 @@ model DiaryCategory {
 
 model DiaryTag {
   id        Int             @id @default(autoincrement())
-  name      String          @unique @db.VarChar(64)
-  color     String          @default("#577590") @db.VarChar(16)
+  name      String          @unique
+  color     String          @default("#577590")
   sortOrder Int             @default(0) @map("sort_order")
   createdAt DateTime        @default(now()) @map("created_at")
   updatedAt DateTime        @updatedAt @map("updated_at")
@@ -91,15 +79,15 @@ model DiaryEntry {
   id             Int                    @id @default(autoincrement())
   userId         Int                    @map("user_id")
   categoryId     Int?                   @map("category_id")
-  title          String                 @db.VarChar(120)
-  content        String                 @db.Text
-  targetName     String                 @default("") @map("target_name") @db.VarChar(64)
-  targetRelation String                 @default("") @map("target_relation") @db.VarChar(64)
-  location       String                 @default("") @db.VarChar(128)
+  title          String
+  content        String
+  targetName     String                 @default("") @map("target_name")
+  targetRelation String                 @default("") @map("target_relation")
+  location       String                 @default("")
   grievanceLevel Int                    @default(3) @map("grievance_level")
   emotionLevel   Int                    @default(3) @map("emotion_level")
   followUpCount  Int                    @default(0) @map("follow_up_count")
-  status         DiaryEntryStatus       @default(OPEN)
+  status         String                 @default("OPEN")
   isPinned       Boolean                @default(false) @map("is_pinned")
   happenedAt     DateTime               @map("happened_at")
   settledAt      DateTime?              @map("settled_at")
@@ -136,9 +124,9 @@ model DiaryEntryAttachment {
   id        Int        @id @default(autoincrement())
   entryId   Int        @map("entry_id")
   userId    Int        @map("user_id")
-  fileUrl   String     @map("file_url") @db.VarChar(512)
-  fileName  String     @default("") @map("file_name") @db.VarChar(255)
-  fileType  String     @default("image") @map("file_type") @db.VarChar(32)
+  fileUrl   String     @map("file_url")
+  fileName  String     @default("") @map("file_name")
+  fileType  String     @default("image") @map("file_type")
   sortOrder Int        @default(0) @map("sort_order")
   createdAt DateTime   @default(now()) @map("created_at")
   entry     DiaryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
@@ -150,16 +138,16 @@ model DiaryEntryAttachment {
 }
 
 model DiaryEntryFollowUp {
-  id           Int               @id @default(autoincrement())
-  entryId      Int               @map("entry_id")
-  userId       Int               @map("user_id")
-  type         DiaryFollowUpType @default(NOTE)
-  content      String            @db.Text
-  emotionDelta Int               @default(0) @map("emotion_delta")
-  createdAt    DateTime          @default(now()) @map("created_at")
-  updatedAt    DateTime          @updatedAt @map("updated_at")
-  entry        DiaryEntry        @relation(fields: [entryId], references: [id], onDelete: Cascade)
-  user         WxUser            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           Int        @id @default(autoincrement())
+  entryId      Int        @map("entry_id")
+  userId       Int        @map("user_id")
+  type         String     @default("NOTE")
+  content      String
+  emotionDelta Int        @default(0) @map("emotion_delta")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  entry        DiaryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  user         WxUser     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([entryId, createdAt])
   @@index([userId, createdAt])

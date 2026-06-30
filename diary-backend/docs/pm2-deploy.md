@@ -3,7 +3,7 @@
 这套后端推荐部署方式：
 
 - 应用：`PM2 + Next.js`
-- 数据库：`MySQL 8.0`
+- 数据库：`SQLite`（单文件，免单独部署数据库服务）
 - Web 服务：`Nginx` 反向代理到 `4010`
 
 ## 环境变量
@@ -39,7 +39,7 @@ cp .env.example .env
 
 编辑 `.env`，填好生产环境配置。
 
-确认 MySQL 数据库和账号已经存在后，执行：
+确认 `.env` 里的 `DATABASE_URL`（SQLite 文件路径）已配置后，执行（首次会自动创建数据库文件）：
 
 ```bash
 npm run db:deploy

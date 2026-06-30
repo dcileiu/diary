@@ -15,7 +15,7 @@ export default function AdminSettingsPage() {
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>前端：微信小程序，围绕首页概览、条目列表、详情与新增编辑。</p>
-          <p>后端：Next.js Route Handlers + Prisma + MySQL。</p>
+          <p>后端：Next.js Route Handlers + Prisma + SQLite。</p>
           <p>后台：概览、条目、分类、标签、用户五块主业务。</p>
           <p>下一步最适合补的是：附件上传、搜索优化、数据导出、内容审核标签。</p>
         </CardContent>
