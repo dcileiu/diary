@@ -148,17 +148,17 @@ export async function savePublicUpload(
   const fileName = `${base}.${ext}`;
   const buf = Buffer.from(await blob.arrayBuffer());
 
-  const { qiniuConfig, shouldUploadToQiniu, uploadToQiniu } = await import(
-    "./qiniu-upload"
+  const { r2Config, shouldUploadToR2, r2ObjectKey, uploadToR2 } = await import(
+    "./r2-upload"
   );
-  const cfg = qiniuConfig();
-  const useQiniu = cfg && shouldUploadToQiniu(subdir);
+  const cfg = r2Config();
+  const useR2 = cfg && shouldUploadToR2(subdir);
 
-  if (useQiniu) {
-    const key = `${cfg.prefix}/${subdir}/${fileName}`;
-    await uploadToQiniu(key, buf, blob.type || undefined);
+  if (useR2) {
+    const key = r2ObjectKey(cfg, subdir, fileName);
+    await uploadToR2(key, buf, blob.type || undefined);
     return {
-      pathname: `/${cfg.prefix}/${subdir}/${fileName}`,
+      pathname: `/${key}`,
       fileName,
     };
   }

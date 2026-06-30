@@ -25,6 +25,19 @@ cp .env.example .env
 - `WECHAT_MINI_PROGRAM_APP_ID`
 - `WECHAT_MINI_PROGRAM_SECRET`
 
+### 图片存储（可选，Cloudflare R2）
+
+不配则图片存到服务器本地 `public/uploads`（或 `UPLOAD_STORAGE_ROOT`）。要用 R2，配置：
+
+- `R2_ACCOUNT_ID`（或直接给 `R2_ENDPOINT`）
+- `R2_ACCESS_KEY_ID`
+- `R2_SECRET_ACCESS_KEY`
+- `R2_BUCKET`
+- `R2_UPLOAD_PREFIX`（可选，默认 `diary`）
+- `PUBLIC_ASSET_ORIGIN` 指向 R2 的公开域名（`pub-xxx.r2.dev` 或绑定的自定义域名）
+
+> R2 的 Access Key 在 Cloudflare 控制台「R2 → Manage R2 API Tokens」创建。配了 R2 后所有图片走 R2：头像存到 `<prefix>/avatar`，其他图片存到 `<prefix>/images`（默认即 `diary/avatar` 与 `diary/images`）。
+
 ## 首次上线命令顺序
 
 在 `diary-backend` 目录执行：

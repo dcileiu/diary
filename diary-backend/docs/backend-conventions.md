@@ -60,6 +60,7 @@ export const POST = withDiaryUser("diary/wechat/foo", "加载失败", async (req
 - 前端 401 由 `lib/admin-client-fetch.ts` 统一拦截：令牌失效自动登出并跳登录页。
 - 登录类接口加 `lib/rate-limit.ts` 限流（当前单实例内存实现；多实例需换 Redis）。
 - 上传仅接受位图，**拒绝 SVG**（XSS 载体），见 `lib/local-upload.ts`。
+- 对象存储用 **Cloudflare R2**（S3 兼容，`lib/r2-upload.ts`）：配齐 R2 凭证时所有图片走 R2（头像 → `<prefix>/avatar`，其他 → `<prefix>/images`，默认 `prefix=diary`），否则回退本地 `public/uploads`。
 - 用户数据访问必须带 `userId` 条件，杜绝越权。
 
 ## 测试
